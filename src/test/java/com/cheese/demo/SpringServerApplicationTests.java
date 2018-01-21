@@ -1,4 +1,4 @@
-package com.cheese;
+package com.cheese.demo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
