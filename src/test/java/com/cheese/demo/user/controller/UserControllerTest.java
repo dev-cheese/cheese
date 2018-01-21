@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -24,10 +25,13 @@ public class UserControllerTest {
 
     @Test
     public void test() throws Exception {
-
         mockMvc.perform(get("users"))
-                .andExpect(status().isOk());
+                .andExpect(status().is4xxClientError());
     }
 
-
+    @Test
+    public void testUpdated() throws Exception {
+        mockMvc.perform(put("users"))
+                .andExpect(status().is4xxClientError());
+    }
 }

@@ -4,6 +4,7 @@ package com.cheese.demo.user.controller;
 import com.cheese.demo.user.domain.User;
 import com.cheese.demo.user.domain.UserRepository;
 import com.cheese.demo.user.dto.UserSignUpReqDto;
+import com.cheese.demo.user.dto.UserUpdateReqDto;
 import com.cheese.demo.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,5 +32,11 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     public Page<User> signUp(Pageable pageable) {
         return userRepository.findAll(pageable);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    @ResponseStatus(value = HttpStatus.OK)
+    public User update(@RequestBody UserUpdateReqDto dto) {
+        return userService.updated(dto);
     }
 }
