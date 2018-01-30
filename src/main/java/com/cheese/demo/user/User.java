@@ -1,4 +1,4 @@
-package com.cheese.demo.user.domain;
+package com.cheese.demo.user;
 
 import com.cheese.demo.common.domain.EntityBaseDateTime;
 import lombok.AccessLevel;
@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.sql.Date;
 
 @Entity
 @Table(name = "user")
@@ -18,7 +18,7 @@ public class User extends EntityBaseDateTime {
     @GeneratedValue
     private Long id;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = "email", updatable = false, nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
@@ -34,10 +34,11 @@ public class User extends EntityBaseDateTime {
     private String mobile;
 
     @Column(name = "dob", columnDefinition = "DATE")
-    private LocalDateTime dob;
+    private Date dob;
 
     @Builder
-    public User(String email, String password, String lastName, String firstName, String mobile, LocalDateTime dob) {
+    public User(Long id, String email, String password, String lastName, String firstName, String mobile, Date dob) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.lastName = lastName;

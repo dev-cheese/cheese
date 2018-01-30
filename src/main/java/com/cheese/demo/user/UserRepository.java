@@ -1,4 +1,4 @@
-package com.cheese.demo.user.domain;
+package com.cheese.demo.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

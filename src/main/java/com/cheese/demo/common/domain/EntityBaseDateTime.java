@@ -1,25 +1,21 @@
 package com.cheese.demo.common.domain;
 
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 public abstract class EntityBaseDateTime {
 
-    @CreatedDate
-    @Column(name = "createdDt", columnDefinition = "DATETIME", updatable = false)
-    private LocalDateTime createdDt;
+    @Column(name = "created_dt", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private Timestamp createdDt;
 
-    @LastModifiedDate
-    @Column(name = "updatedDt", columnDefinition = "DATETIME")
-    private LocalDateTime updatedDt;
+    @Column(name = "updated_dt", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    private Timestamp updatedDt;
 }
