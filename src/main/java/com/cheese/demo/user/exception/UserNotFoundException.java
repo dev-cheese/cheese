@@ -9,8 +9,8 @@ public class UserNotFoundException extends RuntimeException {
     private Long id;
 
     public UserNotFoundException(Long id) {
-        super(String.valueOf(ErrorCodeEnum.USER_NOT_FOIND));
-        log.error(ErrorCodeEnum.USER_NOT_FOIND.getMessage(), id);
+        super(String.valueOf(ErrorCodeEnum.USER_NOT_FOUND));
+        log.error(ErrorCodeEnum.USER_NOT_FOUND.getMessage(), id);
         this.id = id;
     }
 
@@ -18,3 +18,4 @@ public class UserNotFoundException extends RuntimeException {
         return id;
     }
 }
+
