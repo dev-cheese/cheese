@@ -9,8 +9,8 @@ public class EmailDuplicatedException extends RuntimeException {
     private String email;
 
     public EmailDuplicatedException(String email) {
-        super(String.valueOf(ErrorCodeEnum.U001));
-        log.error(ErrorCodeEnum.U001.message(), email);
+        super(String.valueOf(ErrorCodeEnum.EMAIL_DUPLICATION));
+        log.error(ErrorCodeEnum.EMAIL_DUPLICATION.getMessage(), email);
         this.email = email;
     }
 
