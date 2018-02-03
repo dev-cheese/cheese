@@ -1,11 +1,11 @@
 package com.cheese.demo.user;
 
+import com.cheese.demo.user.exception.EmailDuplicationException;
+import com.cheese.demo.user.exception.UserNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 @Transactional
@@ -20,14 +20,16 @@ public class UserService {
 
     // TODO: 2018. 1. 31. 비밀번호 및 이메일 발리데이션 추가할것
     // TODO: 2018. 1. 31. 모델 라이브러리 사용하면 더 좋을 거같음
-    public User create(UserDto.SignUpReq dto) {
-        return userRepository.save(User.builder()
-                .email(dto.getEmail())
-                .password(dto.getPassword())
-                .build());
+    public User create(UserDto.SignUp dto) {
+        final String email = dto.getEmail();
+
+        if (isDuplicatedEmail(email))
+            throw new EmailDuplicationException(email);
+
+        return userRepository.save(modelMapper.map(dto, User.class));
     }
 
-    public User update(Long id, UserDto.UpdateReq dto) {
+    public User update(Long id, UserDto.MyAccount dto) {
         return userRepository.save(User.builder()
                 .id(findById(id).getId())
                 .lastName(dto.getLastName())
@@ -42,7 +44,10 @@ public class UserService {
         if (user != null)
             return user;
         else
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+            throw new UserNotFoundException(id);
+    }
 
+    private boolean isDuplicatedEmail(String email) {
+        return userRepository.findByEmail(email) != null;
     }
 }

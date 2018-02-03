@@ -1,6 +1,7 @@
 package com.cheese.demo.user;
 
 import com.cheese.demo.SpringServerApplication;
+import com.cheese.demo.commons.ErrorCodeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
@@ -17,12 +18,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.sql.Date;
-import java.time.LocalDate;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,22 +33,14 @@ public class UserControllerTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserService userService;
-
     private MockMvc mockMvc;
-    private String email;
 
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .build();
-
-        email = "test@naver.com";
     }
 
     @After
@@ -59,47 +48,55 @@ public class UserControllerTest {
 
     }
 
-    // TODO: 2018. 1. 31. 이메일 중복 validation -yun
-    // TODO: 2018. 1. 31. 이메일 형식 validation -yun
-    // TODO: 2018. 1. 31. 이메일 길이 validation -yun
-    // TODO: 2018. 1. 31. 비밀번호 길이 validation -yun
-
     @Test
     public void test_sign_up() throws Exception {
-        UserDto.SignUpReq signUpReqDto = createSignUpReq();
-
-        ResultActions result = mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(signUpReqDto)));
-
-        result.andDo(print());
-        result.andExpect(status().isCreated());
-        result.andExpect(jsonPath("$.email", is(email)));
-    }
-
-    private UserDto.SignUpReq createSignUpReq() {
-        UserDto.SignUpReq signUpReqDto = new UserDto.SignUpReq();
-        signUpReqDto.setEmail(email);
-        signUpReqDto.setPassword("test");
-        return signUpReqDto;
+        UserDto.SignUp dto = createSignUpReq("cheese10yun@gmail.com", "rePassword", "rePassword");
+        requestSignUp(dto)
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email", is(dto.getEmail())));
     }
 
     @Test
-    public void test_update() throws Exception {
-        UserDto.SignUpReq signUpReqDto = createSignUpReq();
-        User user = userService.create(signUpReqDto);
+    public void sign_up_email_duplicate_assert_that_bad_request_and_code_001() throws Exception {
+        test_sign_up();
 
-        UserDto.UpdateReq updateDto = new UserDto.UpdateReq();
-        updateDto.setDob(Date.valueOf(LocalDate.now()));
-        updateDto.setFirstName("firs");
-        updateDto.setLastName("last");
-        updateDto.setMobile("010-7133-3262");
+        UserDto.SignUp dto = createSignUpReq("cheese10yun@gmail.com", "rePassword", "rePassword");
+        requestSignUp(dto)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.EMAIL_DUPLICATION.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.EMAIL_DUPLICATION.getCode())));
+    }
 
-        ResultActions result = mockMvc.perform(put("/users/" + user.getId())
+    @Test
+    public void sign_up_not_validate_assert_that_bad_request_and_code_XXX() throws Exception {
+        UserDto.SignUp email_type_validation = createSignUpReq("not_email_validate", "rePassword", "rePassword");
+        requestSinUpNotValidate(email_type_validation);
+
+        UserDto.SignUp password_length_validation = createSignUpReq("test@test.com", "123456", "123456");
+        requestSinUpNotValidate(password_length_validation);
+    }
+
+    private void requestSinUpNotValidate(UserDto.SignUp dto) throws Exception {
+        requestSignUp(dto)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.INVALID_INPUTS.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.INVALID_INPUTS.getCode())));
+    }
+
+    private UserDto.SignUp createSignUpReq(String email, String password, String rePassword) {
+        UserDto.SignUp signUpDto = new UserDto.SignUp();
+        signUpDto.setEmail(email);
+        signUpDto.setPassword(password);
+        signUpDto.setRePassword(rePassword);
+        return signUpDto;
+    }
+
+    private ResultActions requestSignUp(UserDto.SignUp signUpDto) throws Exception {
+        return mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateDto)));
-
-        result.andDo(print());
-
+                .content(objectMapper.writeValueAsString(signUpDto)));
     }
 }

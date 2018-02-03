@@ -1,10 +1,7 @@
 package com.cheese.demo.user;
 
-import com.cheese.demo.common.domain.EntityBaseDateTime;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.cheese.demo.commons.EntityBaseDateTime;
+import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -13,6 +10,7 @@ import java.sql.Date;
 @Table(name = "user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Setter
 public class User extends EntityBaseDateTime {
     @Id
     @GeneratedValue
