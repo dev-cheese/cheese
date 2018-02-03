@@ -20,14 +20,14 @@ public class UserService {
 
     // TODO: 2018. 1. 31. 비밀번호 및 이메일 발리데이션 추가할것
     // TODO: 2018. 1. 31. 모델 라이브러리 사용하면 더 좋을 거같음
-    public User create(UserDto.SignUpReq dto) {
+    public User create(UserDto.SignUp dto) {
         return userRepository.save(User.builder()
                 .email(dto.getEmail())
                 .password(dto.getPassword())
                 .build());
     }
 
-    public User update(Long id, UserDto.UpdateReq dto) {
+    public User update(Long id, UserDto.MyAccount dto) {
         return userRepository.save(User.builder()
                 .id(findById(id).getId())
                 .lastName(dto.getLastName())
@@ -43,6 +43,5 @@ public class UserService {
             return user;
         else
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
-
     }
 }

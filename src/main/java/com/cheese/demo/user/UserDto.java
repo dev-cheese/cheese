@@ -40,13 +40,4 @@ public class UserDto {
         private String mobile;
         private Date dob;
     }
-
-    @Getter
-    @Setter
-    static class Update {
-        private String lastName;
-        private String firstName;
-        private String mobile;
-        private Date dob;
-    }
 }

@@ -27,8 +27,8 @@ public class UserController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @ResponseStatus(value = HttpStatus.OK)
-    public UserDto.Update update(@PathVariable Long id, @RequestBody UserDto.MyAccount dto) {
-        return modelMapper.map(userService.update(id, dto), UserDto.Update.class);
+    public UserDto.MyAccount update(@PathVariable Long id, @RequestBody UserDto.MyAccount dto) {
+        return modelMapper.map(userService.update(id, dto), UserDto.MyAccount.class);
     }
 
 }
