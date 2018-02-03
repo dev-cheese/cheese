@@ -1,12 +1,11 @@
 package com.cheese.demo.user;
 
-import com.cheese.demo.user.exception.EmailDuplicatedException;
+import com.cheese.demo.user.exception.EmailDuplicationException;
+import com.cheese.demo.user.exception.UserNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 @Transactional
@@ -25,7 +24,7 @@ public class UserService {
         final String email = dto.getEmail();
 
         if (isDuplicatedEmail(email))
-            throw new EmailDuplicatedException(email);
+            throw new EmailDuplicationException(email);
 
         return userRepository.save(modelMapper.map(dto, User.class));
     }
@@ -45,7 +44,7 @@ public class UserService {
         if (user != null)
             return user;
         else
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+            throw new UserNotFoundException(id);
     }
 
     private boolean isDuplicatedEmail(String email) {

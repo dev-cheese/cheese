@@ -30,5 +30,4 @@ public class UserController {
     public UserDto.MyAccount update(@PathVariable Long id, @RequestBody UserDto.MyAccount dto) {
         return modelMapper.map(userService.update(id, dto), UserDto.MyAccount.class);
     }
-
 }
