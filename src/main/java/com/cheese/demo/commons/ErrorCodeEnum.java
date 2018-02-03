@@ -3,7 +3,7 @@ package com.cheese.demo.commons;
 public enum ErrorCodeEnum {
 
 
-    U001("회원 가입 유효성 검사 실패");
+    U001("중복된 이메일입니다.");
 
     private final String message;
 

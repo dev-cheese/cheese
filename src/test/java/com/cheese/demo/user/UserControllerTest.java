@@ -17,12 +17,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.sql.Date;
-import java.time.LocalDate;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,23 +68,38 @@ public class UserControllerTest {
     }
 
     @Test
-    public void test_update() throws Exception {
-        UserDto.SignUp signUpDto = createSignUpReq(email, "test", "rePassword");
-        User user = userService.create(signUpDto);
+    public void name() throws Exception {
+        test_sign_up();
 
-        UserDto.MyAccount updateDto = new UserDto.MyAccount();
-        updateDto.setDob(Date.valueOf(LocalDate.now()));
-        updateDto.setFirstName("firs");
-        updateDto.setLastName("last");
-        updateDto.setMobile("010-7133-3262");
+        UserDto.SignUp dto = createSignUpReq("cheese10yun@gmail.com", "rePassword", "rePassword");
 
-        ResultActions result = mockMvc.perform(put("/users/" + user.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateDto)));
+        requestSignUp(dto)
+                .andDo(print())
+                .andExpect(status().isBadRequest());
 
-        result.andDo(print());
+//                .andExpect(jsonPath("$.email", is(dto.getEmail())));
+
 
     }
+
+    //    @Test
+//    public void test_update() throws Exception {
+//        UserDto.SignUp signUpDto = createSignUpReq(email, "test", "rePassword");
+//        User user = userService.create(signUpDto);
+//
+//        UserDto.MyAccount updateDto = new UserDto.MyAccount();
+//        updateDto.setDob(Date.valueOf(LocalDate.now()));
+//        updateDto.setFirstName("firs");
+//        updateDto.setLastName("last");
+//        updateDto.setMobile("010-7133-3262");
+//
+//        ResultActions result = mockMvc.perform(put("/users/" + user.getId())
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(objectMapper.writeValueAsString(updateDto)));
+//
+//        result.andDo(print());
+//
+//    }
 
     private UserDto.SignUp createSignUpReq(String email, String password, String rePassword) {
         UserDto.SignUp signUpDto = new UserDto.SignUp();

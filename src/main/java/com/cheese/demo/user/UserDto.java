@@ -24,14 +24,6 @@ public class UserDto {
         private String rePassword;
     }
 
-    // TODO: 2018. 2. 2. 기본 리폰슨스 만들어서 리턴해줄것 -yun
-//    @Getter
-//    @Setter
-//    static class SignUpRes {
-//        private String email;
-//        private String mobile;
-//    }
-
     @Getter
     @Setter
     static class MyAccount {
