@@ -1,6 +1,6 @@
 package com.cheese.demo.user;
 
-import com.cheese.demo.common.domain.EntityBaseDateTime;
+import com.cheese.demo.commons.EntityBaseDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

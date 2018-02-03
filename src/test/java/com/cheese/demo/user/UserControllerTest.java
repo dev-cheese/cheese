@@ -50,8 +50,6 @@ public class UserControllerTest {
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .build();
-
-        email = "test@naver.com";
     }
 
     @After
@@ -66,30 +64,19 @@ public class UserControllerTest {
 
     @Test
     public void test_sign_up() throws Exception {
-        UserDto.SignUpReq signUpReqDto = createSignUpReq();
-
-        ResultActions result = mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(signUpReqDto)));
-
-        result.andDo(print());
-        result.andExpect(status().isCreated());
-        result.andExpect(jsonPath("$.email", is(email)));
-    }
-
-    private UserDto.SignUpReq createSignUpReq() {
-        UserDto.SignUpReq signUpReqDto = new UserDto.SignUpReq();
-        signUpReqDto.setEmail(email);
-        signUpReqDto.setPassword("test");
-        return signUpReqDto;
+        UserDto.SignUp dto = createSignUpReq("cheese10yun@gmail.com", "rePassword", "rePassword");
+        requestSignUp(dto)
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email", is(dto.getEmail())));
     }
 
     @Test
     public void test_update() throws Exception {
-        UserDto.SignUpReq signUpReqDto = createSignUpReq();
-        User user = userService.create(signUpReqDto);
+        UserDto.SignUp signUpDto = createSignUpReq(email, "test", "rePassword");
+        User user = userService.create(signUpDto);
 
-        UserDto.UpdateReq updateDto = new UserDto.UpdateReq();
+        UserDto.MyAccount updateDto = new UserDto.MyAccount();
         updateDto.setDob(Date.valueOf(LocalDate.now()));
         updateDto.setFirstName("firs");
         updateDto.setLastName("last");
@@ -101,5 +88,19 @@ public class UserControllerTest {
 
         result.andDo(print());
 
+    }
+
+    private UserDto.SignUp createSignUpReq(String email, String password, String rePassword) {
+        UserDto.SignUp signUpDto = new UserDto.SignUp();
+        signUpDto.setEmail(email);
+        signUpDto.setPassword(password);
+        signUpDto.setRePassword(rePassword);
+        return signUpDto;
+    }
+
+    private ResultActions requestSignUp(UserDto.SignUp signUpDto) throws Exception {
+        return mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signUpDto)));
     }
 }

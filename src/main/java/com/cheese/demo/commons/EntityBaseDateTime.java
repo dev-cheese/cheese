@@ -1,4 +1,4 @@
-package com.cheese.demo.common.domain;
+package com.cheese.demo.commons;
 
 import lombok.Getter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
