@@ -21,13 +21,13 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserDto.SignUp signUp(@RequestBody @Valid UserDto.SignUp dto) {
-        return modelMapper.map(userService.create(dto), UserDto.SignUp.class);
+    public UserDto.Res signUp(@RequestBody @Valid UserDto.SignUp dto) {
+        return modelMapper.map(userService.create(dto), UserDto.Res.class);
     }
 
-//    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-//    @ResponseStatus(value = HttpStatus.OK)
-//    public UserDto.MyAccount update(@PathVariable Long id, @RequestBody UserDto.MyAccount dto) {
-//        return modelMapper.map(userService.update(id, dto), UserDto.MyAccount.class);
-//    }
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @ResponseStatus(value = HttpStatus.OK)
+    public UserDto.MyAccount update(@PathVariable Long id, @RequestBody UserDto.MyAccount dto) {
+        return modelMapper.map(userService.update(id, dto), UserDto.MyAccount.class);
+    }
 }
