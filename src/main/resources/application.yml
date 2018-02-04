@@ -1,4 +1,10 @@
 spring:
+  profiles:
+    active: local
+
+# Local 환경
+---
+spring:
   jpa:
     database: mysql
     hibernate:
