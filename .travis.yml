@@ -6,6 +6,9 @@ install: true
 
 script: mvn install
 
+services:
+  - mysql
+
 branches:
  only:
     - master
