@@ -1,7 +1,10 @@
 package com.cheese.demo.user;
 
 import com.cheese.demo.commons.EntityBaseDateTime;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -33,15 +36,4 @@ public class User extends EntityBaseDateTime {
 
     @Column(name = "dob", columnDefinition = "DATE")
     private Date dob;
-
-    @Builder
-    public User(Long id, String email, String password, String lastName, String firstName, String mobile, Date dob) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.mobile = mobile;
-        this.dob = dob;
-    }
 }

@@ -90,9 +90,18 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <configuration>
+                    <repoToken>Fr73GVmRTTdhJpUhvabjwxLztMqVfB5p5</repoToken>
+                </configuration>
             </plugin>
         </plugins>
     </build>
