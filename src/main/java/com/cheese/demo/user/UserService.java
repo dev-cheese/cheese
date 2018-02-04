@@ -1,7 +1,6 @@
 package com.cheese.demo.user;
 
 import com.cheese.demo.user.exception.EmailDuplicationException;
-import com.cheese.demo.user.exception.UserNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,23 +28,23 @@ public class UserService {
         return userRepository.save(modelMapper.map(dto, User.class));
     }
 
-    public User update(Long id, UserDto.MyAccount dto) {
-        return userRepository.save(User.builder()
-                .id(findById(id).getId())
-                .lastName(dto.getLastName())
-                .firstName(dto.getFirstName())
-                .mobile(dto.getMobile())
-                .dob(dto.getDob())
-                .build());
-    }
-
-    public User findById(Long id) {
-        User user = userRepository.findOne(id);
-        if (user != null)
-            return user;
-        else
-            throw new UserNotFoundException(id);
-    }
+//    public User update(Long id, UserDto.MyAccount dto) {
+//        return userRepository.save(User.builder()
+//                .id(findById(id).getId())
+//                .lastName(dto.getLastName())
+//                .firstName(dto.getFirstName())
+//                .mobile(dto.getMobile())
+//                .dob(dto.getDob())
+//                .build());
+//    }
+//
+//    public User findById(Long id) {
+//        User user = userRepository.findOne(id);
+//        if (user != null)
+//            return user;
+//        else
+//            throw new UserNotFoundException(id);
+//    }
 
     private boolean isDuplicatedEmail(String email) {
         return userRepository.findByEmail(email) != null;
