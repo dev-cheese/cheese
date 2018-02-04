@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Size;
+import java.sql.Date;
 
 public class UserDto {
 
@@ -23,12 +24,24 @@ public class UserDto {
         private String rePassword;
     }
 
-//    @Getter
-//    @Setter
-//    static class MyAccount {
-//        private String lastName;
-//        private String firstName;
-//        private String mobile;
-//        private Date dob;
-//    }
+    @Getter
+    @Setter
+    static class MyAccount {
+        private String lastName;
+        private String firstName;
+        private String mobile;
+        private Date dob;
+    }
+
+
+    @Getter
+    @Setter
+    static class Res {
+        private Long id;
+        private String email;
+        private String lastName;
+        private String firstName;
+        private String mobile;
+        private Date dob;
+    }
 }
