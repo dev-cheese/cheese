@@ -21,8 +21,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,6 +44,15 @@ public class UserControllerTest {
 
     private MockMvc mockMvc;
 
+
+    private final String email = "cheese10yun@gmail.com";
+    private final String password = "rePassword";
+    private final String rePassword = "rePassword";
+    private final String firstName = "길동";
+    private final String lastName = "홍";
+    private final String mobile = "01071333262";
+    private final Date dob = Date.valueOf(LocalDate.now());
+
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
@@ -53,7 +61,7 @@ public class UserControllerTest {
 
     @Test
     public void sign_up() throws Exception {
-        UserDto.SignUp dto = setSignUpDto("cheese10yun@gmail.com", "rePassword", "rePassword");
+        UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -64,7 +72,7 @@ public class UserControllerTest {
     public void When_sign_up_duplicate_email_expect_EMAIL_DUPLICATION_exception() throws Exception {
         sign_up();
 
-        UserDto.SignUp dto = setSignUpDto("cheese10yun@gmail.com", "rePassword", "rePassword");
+        UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -83,14 +91,7 @@ public class UserControllerTest {
 
     @Test
     public void my_account_update() throws Exception {
-        final String firstName = "남윤";
-        final String lastName = "김";
-        final String mobile = "01071333262";
-
-        UserDto.SignUp signUpDto = setSignUpDto("cheese10yun@gmail.com", "rePassword", "rePassword");
-        User user = userService.create(signUpDto);
-
-        final Date dob = Date.valueOf(LocalDate.now());
+        User user = userService.create(setSignUpDto(email, password, rePassword));
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, user.getId())
@@ -102,17 +103,34 @@ public class UserControllerTest {
     }
 
     @Test
-    public void when_update_not_existed_user_expect_USER_NOT_FOUND_exception() throws Exception {
-        final String firstName = "남윤";
-        final String lastName = "김";
-        final String mobile = "01071333262";
-        final Date dob = Date.valueOf(LocalDate.now());
+    public void When_update_not_existed_user_expect_USER_NOT_FOUND_exception() throws Exception {
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, 0L)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
+    }
+
+    @Test
+    public void get_user() throws Exception {
+        User user = userService.create(setSignUpDto(email, password, rePassword));
+        RequestGetUser(user.getId())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void When_get_user_not_existed_expect_USER_NOT_FOUND_exception() throws Exception {
+        RequestGetUser(0L)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
+    }
+
+    private ResultActions RequestGetUser(Long id) throws Exception {
+        return mockMvc.perform(get("/users/" + id)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
     }
 
     private ResultActions requestMyAccount(UserDto.MyAccount dto, Long id) throws Exception {

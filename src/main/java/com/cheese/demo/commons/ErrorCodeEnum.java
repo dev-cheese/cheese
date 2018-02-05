@@ -23,6 +23,3 @@ public enum ErrorCodeEnum {
         return message;
     }
 }
-
-
-
