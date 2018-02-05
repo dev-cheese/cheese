@@ -29,6 +29,7 @@ public class UserService {
         return userRepository.save(modelMapper.map(dto, User.class));
     }
 
+    // TODO: 2018. 2. 6. 접근 권한 추가해야함 -yun
     public User update(Long id, UserDto.MyAccount dto) {
         User user = findById(id);
         user.setLastName(dto.getLastName());
@@ -37,6 +38,7 @@ public class UserService {
         user.setDob(dto.getDob());
         return user;
     }
+
 
     public User findById(Long id) {
         User user = userRepository.findOne(id);

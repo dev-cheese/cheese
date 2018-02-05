@@ -3,7 +3,6 @@ package com.cheese.demo.user;
 import com.cheese.demo.SpringServerApplication;
 import com.cheese.demo.commons.ErrorCodeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,13 +51,8 @@ public class UserControllerTest {
                 .build();
     }
 
-    @After
-    public void tearDown() {
-
-    }
-
     @Test
-    public void test_sign_up() throws Exception {
+    public void sign_up() throws Exception {
         UserDto.SignUp dto = setSignUpDto("cheese10yun@gmail.com", "rePassword", "rePassword");
         requestSignUp(dto)
                 .andDo(print())
@@ -67,8 +61,8 @@ public class UserControllerTest {
     }
 
     @Test
-    public void sign_up_email_duplicate_assert_that_bad_request_and_code_001() throws Exception {
-        test_sign_up();
+    public void When_sign_up_duplicate_email_expect_EMAIL_DUPLICATION_exception() throws Exception {
+        sign_up();
 
         UserDto.SignUp dto = setSignUpDto("cheese10yun@gmail.com", "rePassword", "rePassword");
         requestSignUp(dto)
@@ -79,7 +73,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void sign_up_not_validate_assert_that_bad_request_and_code_XXX() throws Exception {
+    public void When_sign_up_input_value_is_not_validation_expect_INVALID_INPUTS_exception() throws Exception {
         UserDto.SignUp email_type_validation = setSignUpDto("not_email_validate", "rePassword", "rePassword");
         requestSinUpNotValidate(email_type_validation);
 
@@ -108,7 +102,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void my_account_update_dose_not_exist_user_id_assert_that_USER_NOT_FOUND() throws Exception {
+    public void when_update_not_existed_user_expect_USER_NOT_FOUND_exception() throws Exception {
         final String firstName = "남윤";
         final String lastName = "김";
         final String mobile = "01071333262";
