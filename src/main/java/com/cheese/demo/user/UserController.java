@@ -25,6 +25,12 @@ public class UserController {
         return modelMapper.map(userService.create(dto), UserDto.Res.class);
     }
 
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @ResponseStatus(value = HttpStatus.OK)
+    public UserDto.Res getUser(@PathVariable Long id) {
+        return modelMapper.map(userService.findById(id), UserDto.Res.class);
+    }
+
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @ResponseStatus(value = HttpStatus.OK)
     public UserDto.MyAccount update(@PathVariable Long id, @RequestBody UserDto.MyAccount dto) {
