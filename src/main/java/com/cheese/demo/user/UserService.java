@@ -4,14 +4,8 @@ import com.cheese.demo.user.exception.EmailDuplicationException;
 import com.cheese.demo.user.exception.UserNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -45,11 +39,6 @@ public class UserService {
         return user;
     }
 
-    public PageImpl<UserDto.Res> findAll(Pageable pageable) {
-        Page<User> page = userRepository.findAll(pageable);
-        List<UserDto.Res> content = convertResDto(page);
-        return new PageImpl<>(content, pageable, page.getTotalElements());
-    }
 
     public User findById(Long id) {
         User user = userRepository.findOne(id);
@@ -61,12 +50,5 @@ public class UserService {
 
     private boolean isDuplicatedEmail(String email) {
         return userRepository.findByEmail(email) != null;
-    }
-
-    private List<UserDto.Res> convertResDto(Page<User> page) {
-        return page.getContent()
-                .parallelStream()
-                .map(user -> modelMapper.map(user, UserDto.Res.class))
-                .collect(Collectors.toList());
     }
 }

@@ -63,18 +63,21 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_sign_up_expect_success() throws Exception {
+    public void sign_up() throws Exception {
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email", is(dto.getEmail())));
     }
 
     @Test
     public void When_sign_up_duplicate_email_expect_EMAIL_DUPLICATION_exception() throws Exception {
-        userService.create(setSignUpDto(email, password, rePassword));
+        sign_up();
+
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.EMAIL_DUPLICATION.getMessage())))
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.EMAIL_DUPLICATION.getCode())));
@@ -83,23 +86,14 @@ public class UserControllerTest {
     @Test
     public void When_sign_up_input_value_is_not_validation_expect_INVALID_INPUTS_exception() throws Exception {
         UserDto.SignUp email_type_validation = setSignUpDto("not_email_validate", "rePassword", "rePassword");
+        requestSinUpNotValidate(email_type_validation);
+
         UserDto.SignUp password_length_validation = setSignUpDto("test@test.com", "123456", "123456");
-
-
-        requestSignUp(email_type_validation)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.INVALID_INPUTS.getMessage())))
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.INVALID_INPUTS.getCode())));
-
-
-        requestSignUp(password_length_validation)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.INVALID_INPUTS.getMessage())))
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.INVALID_INPUTS.getCode())));
+        requestSinUpNotValidate(password_length_validation);
     }
 
     @Test
-    public void When_my_account_update_expect_success() throws Exception {
+    public void my_account_update() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
@@ -116,13 +110,13 @@ public class UserControllerTest {
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, 0L)
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
     }
 
     @Test
-    public void When_get_user_expect_success() throws Exception {
+    public void get_user() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         RequestGetUser(user.getId())
                 .andExpect(status().isOk());
@@ -131,7 +125,7 @@ public class UserControllerTest {
     @Test
     public void When_get_user_not_existed_expect_USER_NOT_FOUND_exception() throws Exception {
         RequestGetUser(0L)
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
     }
@@ -199,7 +193,7 @@ public class UserControllerTest {
     private String getUrlPageTemplate(int page, int size) {
         return "/users?page=" + page + "&size=" + size;
     }
-
+  
     private ResultActions RequestGetUser(Long id) throws Exception {
         return mockMvc.perform(get("/users/" + id)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -211,6 +205,14 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print());
+    }
+
+    private void requestSinUpNotValidate(UserDto.SignUp dto) throws Exception {
+        requestSignUp(dto)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.INVALID_INPUTS.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.INVALID_INPUTS.getCode())));
     }
 
     private UserDto.SignUp setSignUpDto(String email, String password, String rePassword) {
@@ -234,8 +236,7 @@ public class UserControllerTest {
     private ResultActions requestSignUp(UserDto.SignUp signUpDto) throws Exception {
         return mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(signUpDto)))
-                .andDo(print());
+                .content(objectMapper.writeValueAsString(signUpDto)));
     }
 
     private void eachCreateUser(final int endExclusive) {
