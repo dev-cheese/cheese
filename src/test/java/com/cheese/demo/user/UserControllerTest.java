@@ -19,9 +19,11 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -136,9 +138,7 @@ public class UserControllerTest {
 
     @Test
     public void When_get_users_expect_success() throws Exception {
-        IntStream.range(0, 20).forEach(i ->
-                userService.create(setSignUpDto(i + email, password, rePassword)));
-
+        eachCreateUser(20);
         requestGetUsers()
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements", is(instanceOf(Integer.class))))
@@ -146,14 +146,58 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.totalPages", is(instanceOf(Integer.class))))
                 .andExpect(jsonPath("$.size", is(instanceOf(Integer.class))))
                 .andExpect(jsonPath("$.number", is(instanceOf(Integer.class))))
-                .andExpect(jsonPath("$.sort", is(nullValue())))
+                .andExpect(jsonPath("$.sort", is(instanceOf(List.class))))
                 .andExpect(jsonPath("$.first", is(instanceOf(Boolean.class))))
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
 
+    @Test
+    public void when_get_2_page_user_expect_success() throws Exception {
+        eachCreateUser(20);
+        final int size = 10;
+        final int page = 2;
+
+        requestGetUsersInPage(page, size)
+                .andExpect(jsonPath("$.totalElements", is(instanceOf(Integer.class))))
+                .andExpect(jsonPath("$.last", is(instanceOf(Boolean.class))))
+                .andExpect(jsonPath("$.totalPages", is(instanceOf(Integer.class))))
+                .andExpect(jsonPath("$.size", is(size)))
+                .andExpect(jsonPath("$.number", is(page - 1)))
+                .andExpect(jsonPath("$.sort", is(instanceOf(List.class))))
+                .andExpect(jsonPath("$.first", is(instanceOf(Boolean.class))))
+                .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
+    }
+
+    @Test
+    public void When_size_over_than_50_expect_size_set_10() throws Exception {
+        eachCreateUser(20);
+        final int size = 51;
+        final int page = 2;
+
+        requestGetUsersInPage(page, size)
+                .andExpect(jsonPath("$.totalElements", is(instanceOf(Integer.class))))
+                .andExpect(jsonPath("$.last", is(instanceOf(Boolean.class))))
+                .andExpect(jsonPath("$.totalPages", is(instanceOf(Integer.class))))
+                .andExpect(jsonPath("$.size", is(10)))
+                .andExpect(jsonPath("$.number", is(page - 1)))
+                .andExpect(jsonPath("$.sort", is(instanceOf(List.class))))
+                .andExpect(jsonPath("$.first", is(instanceOf(Boolean.class))))
+                .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
+    }
+
+
     private ResultActions requestGetUsers() throws Exception {
         return mockMvc.perform(get("/users/"))
                 .andDo(print());
+    }
+
+    private ResultActions requestGetUsersInPage(int page, int size) throws Exception {
+        return mockMvc.perform(get(getUrlPageTemplate(page, size)))
+                .andDo(print());
+    }
+
+    private String getUrlPageTemplate(int page, int size) {
+        return "/users?page=" + page + "&size=" + size;
     }
 
     private ResultActions RequestGetUser(Long id) throws Exception {
@@ -192,5 +236,10 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signUpDto)))
                 .andDo(print());
+    }
+
+    private void eachCreateUser(final int endExclusive) {
+        IntStream.range(0, endExclusive).forEach(i ->
+                userService.create(setSignUpDto(i + email, password, rePassword)));
     }
 }
