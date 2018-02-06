@@ -1,8 +1,10 @@
 package com.cheese.demo.user;
 
 
+import com.cheese.demo.commons.vo.PageVo;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +25,12 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public UserDto.Res signUp(@RequestBody @Valid UserDto.SignUp dto) {
         return modelMapper.map(userService.create(dto), UserDto.Res.class);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseStatus(value = HttpStatus.OK)
+    public Page<UserDto.Res> getUsers(PageVo pageVo) {
+        return userService.findAll(pageVo.makePageable(0, "id"));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
