@@ -63,7 +63,8 @@ public class UserControllerTest {
     }
 
     @Test
-    public void sign_up() throws Exception {
+//    public void When_sign_up_expect_succeed() throws Exception {
+    public void When_sign_up_expect_succeed() throws Exception {
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
                 .andDo(print())
@@ -73,7 +74,7 @@ public class UserControllerTest {
 
     @Test
     public void When_sign_up_duplicate_email_expect_EMAIL_DUPLICATION_exception() throws Exception {
-        sign_up();
+        When_sign_up_expect_succeed();
 
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
@@ -116,7 +117,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void get_user() throws Exception {
+    public void When_get_user_expect_succeed() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         RequestGetUser(user.getId())
                 .andExpect(status().isOk());
@@ -131,7 +132,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_get_users_expect_success() throws Exception {
+    public void When_get_users_expect_succeed() throws Exception {
         eachCreateUser(20);
         requestGetUsers()
                 .andExpect(status().isOk())
@@ -146,7 +147,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void when_get_2_page_user_expect_success() throws Exception {
+    public void When_get_2_page_user_expect_succeed() throws Exception {
         eachCreateUser(20);
         final int size = 10;
         final int page = 2;
