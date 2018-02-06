@@ -33,7 +33,6 @@ public class UserDto {
         private Date dob;
     }
 
-
     @Getter
     @Setter
     static class Res {
