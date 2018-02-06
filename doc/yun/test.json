@@ -1,40 +1,20 @@
 {
-  "message": "유효하지 않은 값입니다. 입력값을 확인하세요",
-  "code": "XXX",
-  "status": 400,
-  "errors": [
+  "content": [
     {
-      "codes": [
-        "Email.signUp.email",
-        "Email.email",
-        "Email.java.lang.String",
-        "Email"
-      ],
-      "arguments": [
-        {
-          "codes": [
-            "signUp.email",
-            "email"
-          ],
-          "arguments": null,
-          "defaultMessage": "email",
-          "code": "email"
-        },
-        [],
-        {
-          "arguments": null,
-          "defaultMessage": ".*",
-          "codes": [
-            ".*"
-          ]
-        }
-      ],
-      "defaultMessage": "not a well-formed email address",
-      "objectName": "signUp",
-      "field": "email",
-      "rejectedValue": "not_email_validate",
-      "bindingFailure": false,
-      "code": "Email"
+      "id": 1,
+      "email": "cheese10yun@gmail.com",
+      "lastName": null,
+      "firstName": null,
+      "mobile": null,
+      "dob": null
     }
-  ]
+  ],
+  "totalElements": 1,
+  "last": true,
+  "totalPages": 1,
+  "size": 20,
+  "number": 0,
+  "sort": null,
+  "first": true,
+  "numberOfElements": 1
 }

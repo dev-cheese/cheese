@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.sql.Date;
 import java.time.LocalDate;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -70,8 +70,7 @@ public class UserControllerTest {
 
     @Test
     public void When_sign_up_duplicate_email_expect_EMAIL_DUPLICATION_exception() throws Exception {
-        sign_up();
-
+        userService.create(setSignUpDto(email, password, rePassword));
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
                 .andDo(print())
@@ -107,7 +106,7 @@ public class UserControllerTest {
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, 0L)
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
     }
@@ -122,9 +121,31 @@ public class UserControllerTest {
     @Test
     public void When_get_user_not_existed_expect_USER_NOT_FOUND_exception() throws Exception {
         RequestGetUser(0L)
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
+    }
+
+    @Test
+    public void get_users() throws Exception {
+        // TODO: 2018. 2. 6. 더미데이터 만들것 -yun
+        userService.create(setSignUpDto(email, password, rePassword));
+        requestGetUsers()
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements", is(instanceOf(Integer.class))))
+                .andExpect(jsonPath("$.last", is(instanceOf(Boolean.class))))
+                .andExpect(jsonPath("$.totalPages", is(instanceOf(Integer.class))))
+                .andExpect(jsonPath("$.size", is(instanceOf(Integer.class))))
+                .andExpect(jsonPath("$.number", is(instanceOf(Integer.class))))
+                .andExpect(jsonPath("$.sort", is(nullValue())))
+                .andExpect(jsonPath("$.first", is(instanceOf(Boolean.class))))
+                .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
+
+    }
+
+    private ResultActions requestGetUsers() throws Exception {
+        return mockMvc.perform(get("/users/"))
+                .andDo(print());
     }
 
     private ResultActions RequestGetUser(Long id) throws Exception {
