@@ -1,11 +1,7 @@
-package com.cheese.demo.commons.exception;
+package com.cheese.demo.commons;
 
-import com.cheese.demo.commons.ErrorCodeEnum;
-import com.cheese.demo.commons.ErrorResponse;
 import com.cheese.demo.user.exception.EmailDuplicationException;
 import com.cheese.demo.user.exception.UserNotFoundException;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -20,12 +16,8 @@ import java.util.List;
 @ControllerAdvice
 public class ExceptionAdviceController {
 
-    @Autowired
-    private ModelMapper modelMapper;
-
     @ExceptionHandler(value = {
-            EmailDuplicationException.class,
-            UserNotFoundException.class
+            EmailDuplicationException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -34,16 +26,25 @@ public class ExceptionAdviceController {
         return getErrorResponse(HttpStatus.BAD_REQUEST.value(), code.getCode(), code.getMessage(), null);
     }
 
+    @ExceptionHandler(value = {
+            UserNotFoundException.class
+    })
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse handleFoundException(RuntimeException ex) {
+        ErrorCodeEnum code = getErrorCodeEnum(ex.getMessage());
+        return getErrorResponse(HttpStatus.NOT_FOUND.value(), code.getCode(), code.getMessage(), null);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorResponse validationError(MethodArgumentNotValidException ex) {
+    public ErrorResponse handleValidationError(MethodArgumentNotValidException ex) {
         BindingResult result = ex.getBindingResult();
         final List<FieldError> fieldErrors = result.getFieldErrors();
         ErrorCodeEnum code = getErrorCodeEnum("INVALID_INPUTS");
         return getErrorResponse(HttpStatus.BAD_REQUEST.value(), code.getCode(), code.getMessage(), fieldErrors);
     }
-
 
     private ErrorResponse getErrorResponse(int status, String code, String message, List<FieldError> errors) {
         return new ErrorResponse(message, code, status, errors);
