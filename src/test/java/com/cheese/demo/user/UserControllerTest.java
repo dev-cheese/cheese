@@ -63,8 +63,8 @@ public class UserControllerTest {
     }
 
     @Test
-//    public void When_sign_up_expect_succeed() throws Exception {
-    public void When_sign_up_expect_succeed() throws Exception {
+//    public void When_signUp_expect_succeed() throws Exception {
+    public void When_signUp_expect_succeed() throws Exception {
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
                 .andDo(print())
@@ -73,8 +73,8 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_sign_up_duplicate_email_expect_EMAIL_DUPLICATION_exception() throws Exception {
-        When_sign_up_expect_succeed();
+    public void When_duplicateEmail_expect_EMAIL_DUPLICATION() throws Exception {
+        When_signUp_expect_succeed();
 
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
@@ -85,7 +85,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_sign_up_input_value_is_not_validation_expect_INVALID_INPUTS_exception() throws Exception {
+    public void When_inputValueNotValidation_expect_INVALID_INPUTS() throws Exception {
         UserDto.SignUp email_type_validation = setSignUpDto("not_email_validate", "rePassword", "rePassword");
         requestSinUpNotValidate(email_type_validation);
 
@@ -94,7 +94,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void my_account_update() throws Exception {
+    public void When_myAccountUpdate_expect_succeed() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
@@ -107,7 +107,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_update_not_existed_user_expect_USER_NOT_FOUND_exception() throws Exception {
+    public void When_notExistedUserUpdate_expect_USER_NOT_FOUND() throws Exception {
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, 0L)
@@ -117,14 +117,14 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_get_user_expect_succeed() throws Exception {
+    public void When_getUser_expect_succeed() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         RequestGetUser(user.getId())
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void When_get_user_not_existed_expect_USER_NOT_FOUND_exception() throws Exception {
+    public void When_notExistedUserGet_expect_USER_NOT_FOUND() throws Exception {
         RequestGetUser(0L)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
@@ -132,7 +132,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_get_users_expect_succeed() throws Exception {
+    public void When_getUsers_expect_succeed() throws Exception {
         eachCreateUser(20);
         requestGetUsers()
                 .andExpect(status().isOk())
@@ -147,7 +147,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_get_2_page_user_expect_succeed() throws Exception {
+    public void When_get2Page_expect_succeed() throws Exception {
         eachCreateUser(20);
         final int size = 10;
         final int page = 2;
@@ -164,7 +164,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_size_over_than_50_expect_size_set_10() throws Exception {
+    public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
         eachCreateUser(20);
         final int size = 51;
         final int page = 2;
@@ -180,6 +180,30 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
 
+    @Test
+    public void When_emailNotExist_expect_false() throws Exception {
+        requestExists("email", email)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.existence", is(false)));
+    }
+
+    @Test
+    public void When_emailExist_expect_true() throws Exception {
+        userService.create(setSignUpDto(email, password, rePassword));
+        requestExists("email", email)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.existence", is(true)));
+    }
+
+    private ResultActions requestExists(String type, String value) throws Exception {
+        return mockMvc.perform(get(getUrlExistsTemplate(type, value))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
+
+    private String getUrlExistsTemplate(String type, String value) {
+        return "/users/exists?" + type + "=" + value;
+    }
 
     private ResultActions requestGetUsers() throws Exception {
         return mockMvc.perform(get("/users/"))
@@ -194,7 +218,7 @@ public class UserControllerTest {
     private String getUrlPageTemplate(int page, int size) {
         return "/users?page=" + page + "&size=" + size;
     }
-  
+
     private ResultActions RequestGetUser(Long id) throws Exception {
         return mockMvc.perform(get("/users/" + id)
                 .contentType(MediaType.APPLICATION_JSON))

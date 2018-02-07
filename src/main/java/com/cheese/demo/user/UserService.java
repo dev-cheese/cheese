@@ -60,6 +60,12 @@ public class UserService {
             throw new UserNotFoundException(id);
     }
 
+    public UserDto.Existence isExist(String email) {
+        UserDto.Existence existence = new UserDto.Existence();
+        existence.setExistence(isDuplicatedEmail(email));
+        return existence;
+    }
+
     private boolean isDuplicatedEmail(String email) {
         return userRepository.findByEmail(email) != null;
     }
