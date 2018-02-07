@@ -44,4 +44,10 @@ public class UserController {
     public UserDto.MyAccount update(@PathVariable Long id, @RequestBody UserDto.MyAccount dto) {
         return modelMapper.map(userService.update(id, dto), UserDto.MyAccount.class);
     }
+
+    @RequestMapping(value = "/exists", method = RequestMethod.GET)
+    @ResponseStatus(value = HttpStatus.OK)
+    public UserDto.Existence isExist(@RequestParam(value = "email") String email) {
+        return userService.isExist(email);
+    }
 }
