@@ -135,6 +135,7 @@ public class UserControllerTest {
     @Test
 //   없는 유저 조회시 404
     public void When_getUserNotExisted_expect_USER_NOT_FOUND() throws Exception {
+
         RequestGetUser(0L)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
@@ -193,6 +194,30 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
 
+    @Test
+    public void When_emailNotExist_expect_false() throws Exception {
+        requestExists("email", email)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.existence", is(false)));
+    }
+
+    @Test
+    public void When_emailExist_expect_true() throws Exception {
+        userService.create(setSignUpDto(email, password, rePassword));
+        requestExists("email", email)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.existence", is(true)));
+    }
+
+    private ResultActions requestExists(String type, String value) throws Exception {
+        return mockMvc.perform(get(getUrlExistsTemplate(type, value))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+    }
+
+    private String getUrlExistsTemplate(String type, String value) {
+        return "/users/exists?" + type + "=" + value;
+    }
 
     private ResultActions requestGetUsers() throws Exception {
         return mockMvc.perform(get("/users/"))

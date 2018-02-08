@@ -34,4 +34,10 @@ public class UserDto {
         private String mobile;
         private Date dob;
     }
+
+    @Getter
+    @Setter
+    static class Existence {
+        private boolean existence;
+    }
 }
