@@ -5,7 +5,8 @@ public enum ErrorCodeEnum {
 
     EMAIL_DUPLICATION("U001", "중복된 이메일입니다."),
     USER_NOT_FOUND("U002", "해당 회원을 찾을 수 없습니다."),
-    INVALID_INPUTS("XXX", "유효하지 않은 값입니다. 입력값을 확인하세요");
+    INVALID_INPUTS("XXX", "유효하지 않은 값입니다. 입력값을 확인하세요"),
+    INVALID_DOMAIN("D001", "유효하지 않은 값입니다. 입력값을 확인하세요");
 
     private final String code;
     private final String message;

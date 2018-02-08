@@ -49,8 +49,8 @@ public class UserControllerTest {
 
 
     private final String email = "cheese10yun@gmail.com";
-    private final String password = "rePassword";
-    private final String rePassword = "rePassword";
+    private final String password = "passwordIsValidated001";
+    private final String rePassword = "passwordIsValidated001";
     private final String firstName = "길동";
     private final String lastName = "홍";
     private final String mobile = "01071333262";
@@ -63,7 +63,7 @@ public class UserControllerTest {
     }
 
     @Test
-//    public void When_signUp_expect_succeed() throws Exception {
+//    회원가입
     public void When_signUp_expect_succeed() throws Exception {
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
@@ -73,10 +73,11 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_duplicateEmail_expect_EMAIL_DUPLICATION() throws Exception {
-        When_signUp_expect_succeed();
-
+//    이메일 중복 예외
+    public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
         UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
+        userService.create(dto);
+
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -85,15 +86,21 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_inputValueNotValidation_expect_INVALID_INPUTS() throws Exception {
-        UserDto.SignUp email_type_validation = setSignUpDto("not_email_validate", "rePassword", "rePassword");
-        requestSinUpNotValidate(email_type_validation);
-
-        UserDto.SignUp password_length_validation = setSignUpDto("test@test.com", "123456", "123456");
-        requestSinUpNotValidate(password_length_validation);
+//    이메일 유효성 예외
+    public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
+        UserDto.SignUp email_type_validation = setSignUpDto("not_email_validate", password, rePassword);
+        requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
     @Test
+//    비밀번호 유호성 예외
+    public void When_passwordIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
+        UserDto.SignUp password_length_validation = setSignUpDto(email, "123456", "123456");
+        requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_DOMAIN);
+    }
+
+    @Test
+//    회원 정보 수정
     public void When_myAccountUpdate_expect_succeed() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
@@ -107,7 +114,8 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_notExistedUserUpdate_expect_USER_NOT_FOUND() throws Exception {
+//    없는 유저 업데이트시 404
+    public void When_notExistedUser_expect_USER_NOT_FOUND() throws Exception {
         UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, 0L)
@@ -117,6 +125,7 @@ public class UserControllerTest {
     }
 
     @Test
+//    특정 유저 조회
     public void When_getUser_expect_succeed() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         RequestGetUser(user.getId())
@@ -124,7 +133,9 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_notExistedUserGet_expect_USER_NOT_FOUND() throws Exception {
+//   없는 유저 조회시 404
+    public void When_getUserNotExisted_expect_USER_NOT_FOUND() throws Exception {
+
         RequestGetUser(0L)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
@@ -132,6 +143,7 @@ public class UserControllerTest {
     }
 
     @Test
+//    유저 페이지 조회
     public void When_getUsers_expect_succeed() throws Exception {
         eachCreateUser(20);
         requestGetUsers()
@@ -147,7 +159,8 @@ public class UserControllerTest {
     }
 
     @Test
-    public void When_get2Page_expect_succeed() throws Exception {
+//    유저 2 페이지 조회
+    public void When_getUserPage2_expect_succeed() throws Exception {
         eachCreateUser(20);
         final int size = 10;
         final int page = 2;
@@ -164,6 +177,7 @@ public class UserControllerTest {
     }
 
     @Test
+//    페이지 사이즈 50 이상일 경우 10으로 강제 지정
     public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
         eachCreateUser(20);
         final int size = 51;
@@ -232,12 +246,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    private void requestSinUpNotValidate(UserDto.SignUp dto) throws Exception {
+    private void requestSinUpNotValidate(UserDto.SignUp dto, ErrorCodeEnum invalidInputs) throws Exception {
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.INVALID_INPUTS.getMessage())))
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.INVALID_INPUTS.getCode())));
+                .andExpect(jsonPath("$.message", is(invalidInputs.getMessage())))
+                .andExpect(jsonPath("$.code", is(invalidInputs.getCode())));
     }
 
     private UserDto.SignUp setSignUpDto(String email, String password, String rePassword) {
