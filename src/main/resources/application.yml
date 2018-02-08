@@ -8,7 +8,7 @@ spring:
   jpa:
     database: mysql
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
   datasource:
     url: jdbc:mysql://localhost:3306/cheese?useSSL=false

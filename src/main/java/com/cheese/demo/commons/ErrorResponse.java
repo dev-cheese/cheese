@@ -1,15 +1,10 @@
 package com.cheese.demo.commons;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.validation.FieldError;
+import lombok.Data;
 
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 public class ErrorResponse {
 
     private String message;
@@ -17,11 +12,10 @@ public class ErrorResponse {
     private int status;
     private List<FieldError> errors;
 
-//    @Getter
-//    @Setter
-//    public static class FieldError {
-//        private String field;
-//        private String rejectedValue;
-//        private String defaultMessage;
-//    }
+    @Data
+    public static class FieldError {
+        private String propertyPath;
+        private String inValidValue;
+        private String message;
+    }
 }
