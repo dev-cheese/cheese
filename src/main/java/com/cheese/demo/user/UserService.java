@@ -1,5 +1,6 @@
 package com.cheese.demo.user;
 
+import com.cheese.demo.commons.CommonDto;
 import com.cheese.demo.user.exception.EmailDuplicationException;
 import com.cheese.demo.user.exception.UserNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -26,7 +27,7 @@ public class UserService {
 
     // TODO: 2018. 1. 31. 비밀번호 및 이메일 발리데이션 추가할것
     // TODO: 2018. 1. 31. 모델 라이브러리 사용하면 더 좋을 거같음
-    public User create(UserDto.SignUp dto) {
+    public User create(UserDto.SignUpReq dto) {
         final String email = dto.getEmail();
 
         if (isDuplicatedEmail(email))
@@ -36,7 +37,7 @@ public class UserService {
     }
 
     // TODO: 2018. 2. 6. 접근 권한 추가해야함 -yun
-    public User update(Long id, UserDto.MyAccount dto) {
+    public User update(Long id, UserDto.MyAccountReq dto) {
         User user = findById(id);
         user.setLastName(dto.getLastName());
         user.setFirstName(dto.getFirstName());
@@ -60,8 +61,8 @@ public class UserService {
             throw new UserNotFoundException(id);
     }
 
-    public UserDto.Existence isExist(String email) {
-        UserDto.Existence existence = new UserDto.Existence();
+    public CommonDto.ExistenceRes isExist(String email) {
+        CommonDto.ExistenceRes existence = new CommonDto.ExistenceRes();
         existence.setExistence(isDuplicatedEmail(email));
         return existence;
     }

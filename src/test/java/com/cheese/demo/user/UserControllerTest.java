@@ -65,7 +65,7 @@ public class UserControllerTest {
     @Test
 //    회원가입
     public void When_signUp_expect_succeed() throws Exception {
-        UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
+        UserDto.SignUpReq dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -75,7 +75,7 @@ public class UserControllerTest {
     @Test
 //    이메일 중복 예외
     public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
-        UserDto.SignUp dto = setSignUpDto(email, password, rePassword);
+        UserDto.SignUpReq dto = setSignUpDto(email, password, rePassword);
         userService.create(dto);
 
         requestSignUp(dto)
@@ -88,14 +88,14 @@ public class UserControllerTest {
     @Test
 //    이메일 유효성 예외
     public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
-        UserDto.SignUp email_type_validation = setSignUpDto("not_email_validate", password, rePassword);
+        UserDto.SignUpReq email_type_validation = setSignUpDto("not_email_validate", password, rePassword);
         requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
     @Test
 //    비밀번호 유호성 예외
     public void When_passwordIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
-        UserDto.SignUp password_length_validation = setSignUpDto(email, "123456", "123456");
+        UserDto.SignUpReq password_length_validation = setSignUpDto(email, "123456", "123456");
         requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
@@ -103,7 +103,7 @@ public class UserControllerTest {
 //    회원 정보 수정
     public void When_myAccountUpdate_expect_succeed() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
-        UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
+        UserDto.MyAccountReq dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, user.getId())
                 .andExpect(status().isOk())
@@ -116,7 +116,7 @@ public class UserControllerTest {
     @Test
 //    없는 유저 업데이트시 404
     public void When_notExistedUser_expect_USER_NOT_FOUND() throws Exception {
-        UserDto.MyAccount dto = setMyAccountDto(firstName, lastName, mobile, dob);
+        UserDto.MyAccountReq dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, 0L)
                 .andExpect(status().isBadRequest())
@@ -239,14 +239,14 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    private ResultActions requestMyAccount(UserDto.MyAccount dto, Long id) throws Exception {
+    private ResultActions requestMyAccount(UserDto.MyAccountReq dto, Long id) throws Exception {
         return mockMvc.perform(put("/users/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print());
     }
 
-    private void requestSinUpNotValidate(UserDto.SignUp dto, ErrorCodeEnum invalidInputs) throws Exception {
+    private void requestSinUpNotValidate(UserDto.SignUpReq dto, ErrorCodeEnum invalidInputs) throws Exception {
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -254,16 +254,16 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.code", is(invalidInputs.getCode())));
     }
 
-    private UserDto.SignUp setSignUpDto(String email, String password, String rePassword) {
-        UserDto.SignUp signUpDto = new UserDto.SignUp();
-        signUpDto.setEmail(email);
-        signUpDto.setPassword(password);
-        signUpDto.setRePassword(rePassword);
-        return signUpDto;
+    private UserDto.SignUpReq setSignUpDto(String email, String password, String rePassword) {
+        UserDto.SignUpReq signUpReqDto = new UserDto.SignUpReq();
+        signUpReqDto.setEmail(email);
+        signUpReqDto.setPassword(password);
+        signUpReqDto.setRePassword(rePassword);
+        return signUpReqDto;
     }
 
-    private UserDto.MyAccount setMyAccountDto(String firstName, String lastName, String mobile, Date dob) {
-        UserDto.MyAccount dto = new UserDto.MyAccount();
+    private UserDto.MyAccountReq setMyAccountDto(String firstName, String lastName, String mobile, Date dob) {
+        UserDto.MyAccountReq dto = new UserDto.MyAccountReq();
 
         dto.setFirstName(firstName);
         dto.setLastName(lastName);
@@ -272,10 +272,10 @@ public class UserControllerTest {
         return dto;
     }
 
-    private ResultActions requestSignUp(UserDto.SignUp signUpDto) throws Exception {
+    private ResultActions requestSignUp(UserDto.SignUpReq signUpReqDto) throws Exception {
         return mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(signUpDto)));
+                .content(objectMapper.writeValueAsString(signUpReqDto)));
     }
 
     private void eachCreateUser(final int endExclusive) {

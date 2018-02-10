@@ -9,7 +9,7 @@ public class UserDto {
 
     @Getter
     @Setter
-    static class SignUp {
+    static class SignUpReq {
         private String email;
         private String password;
         private String rePassword;
@@ -17,7 +17,7 @@ public class UserDto {
 
     @Getter
     @Setter
-    static class MyAccount {
+    static class MyAccountReq {
         private String lastName;
         private String firstName;
         private String mobile;
@@ -35,9 +35,4 @@ public class UserDto {
         private Date dob;
     }
 
-    @Getter
-    @Setter
-    static class Existence {
-        private boolean existence;
-    }
 }

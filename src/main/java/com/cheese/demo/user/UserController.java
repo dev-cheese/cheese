@@ -1,6 +1,7 @@
 package com.cheese.demo.user;
 
 
+import com.cheese.demo.commons.CommonDto;
 import com.cheese.demo.commons.vo.PageVo;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserDto.Res signUp(@RequestBody @Valid UserDto.SignUp dto) {
+    public UserDto.Res signUp(@RequestBody @Valid UserDto.SignUpReq dto) {
         return modelMapper.map(userService.create(dto), UserDto.Res.class);
     }
 
@@ -41,13 +42,13 @@ public class UserController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @ResponseStatus(value = HttpStatus.OK)
-    public UserDto.MyAccount update(@PathVariable Long id, @RequestBody UserDto.MyAccount dto) {
-        return modelMapper.map(userService.update(id, dto), UserDto.MyAccount.class);
+    public UserDto.MyAccountReq update(@PathVariable Long id, @RequestBody UserDto.MyAccountReq dto) {
+        return modelMapper.map(userService.update(id, dto), UserDto.MyAccountReq.class);
     }
 
     @RequestMapping(value = "/exists", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
-    public UserDto.Existence isExist(@RequestParam(value = "email") String email) {
+    public CommonDto.ExistenceRes isExist(@RequestParam(value = "email") String email) {
         return userService.isExist(email);
     }
 }
