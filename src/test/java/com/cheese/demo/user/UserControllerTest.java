@@ -62,8 +62,8 @@ public class UserControllerTest {
                 .build();
     }
 
+    //    회원가입
     @Test
-//    회원가입
     public void When_signUp_expect_succeed() throws Exception {
         UserDto.SignUpReq dto = setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
@@ -72,8 +72,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.email", is(dto.getEmail())));
     }
 
+    //    이메일 중복 예외
     @Test
-//    이메일 중복 예외
     public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
         UserDto.SignUpReq dto = setSignUpDto(email, password, rePassword);
         userService.create(dto);
@@ -85,22 +85,22 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.EMAIL_DUPLICATION.getCode())));
     }
 
+    //    이메일 유효성 예외
     @Test
-//    이메일 유효성 예외
     public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
         UserDto.SignUpReq email_type_validation = setSignUpDto("not_email_validate", password, rePassword);
         requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
+    //    비밀번호 유호성 예외
     @Test
-//    비밀번호 유호성 예외
     public void When_passwordIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
         UserDto.SignUpReq password_length_validation = setSignUpDto(email, "123456", "123456");
         requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
+    //    회원 정보 수정
     @Test
-//    회원 정보 수정
     public void When_myAccountUpdate_expect_succeed() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         UserDto.MyAccountReq dto = setMyAccountDto(firstName, lastName, mobile, dob);
@@ -113,8 +113,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.dob", is(dob.toString())));
     }
 
+    //    없는 유저 업데이트시 404
     @Test
-//    없는 유저 업데이트시 404
     public void When_notExistedUser_expect_USER_NOT_FOUND() throws Exception {
         UserDto.MyAccountReq dto = setMyAccountDto(firstName, lastName, mobile, dob);
 
@@ -124,16 +124,16 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
     }
 
+    //    특정 유저 조회
     @Test
-//    특정 유저 조회
     public void When_getUser_expect_succeed() throws Exception {
         User user = userService.create(setSignUpDto(email, password, rePassword));
         RequestGetUser(user.getId())
                 .andExpect(status().isOk());
     }
 
+    //   없는 유저 조회시 404
     @Test
-//   없는 유저 조회시 404
     public void When_getUserNotExisted_expect_USER_NOT_FOUND() throws Exception {
 
         RequestGetUser(0L)
@@ -142,8 +142,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
     }
 
+    //    유저 페이지 조회
     @Test
-//    유저 페이지 조회
     public void When_getUsers_expect_succeed() throws Exception {
         eachCreateUser(20);
         requestGetUsers()
@@ -158,8 +158,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
 
+    //    유저 2 페이지 조회
     @Test
-//    유저 2 페이지 조회
     public void When_getUserPage2_expect_succeed() throws Exception {
         eachCreateUser(20);
         final int size = 10;
@@ -176,8 +176,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
 
+    //    페이지 사이즈 50 이상일 경우 10으로 강제 지정
     @Test
-//    페이지 사이즈 50 이상일 경우 10으로 강제 지정
     public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
         eachCreateUser(20);
         final int size = 51;
