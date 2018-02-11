@@ -2,7 +2,7 @@ package com.cheese.demo.member;
 
 import com.cheese.demo.commons.CommonDto;
 import com.cheese.demo.member.exception.EmailDuplicationException;
-import com.cheese.demo.member.exception.UserNotFoundException;
+import com.cheese.demo.member.exception.MemberNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -61,7 +61,7 @@ public class MemberService {
         if (member != null)
             return member;
         else
-            throw new UserNotFoundException(id);
+            throw new MemberNotFoundException(id);
     }
 
     public Member findByEmail(String email) {
@@ -69,7 +69,7 @@ public class MemberService {
         if (member != null)
             return member;
         else
-            throw new UserNotFoundException(email);
+            throw new MemberNotFoundException(email);
     }
 
     public CommonDto.ExistenceRes isExist(String email) {

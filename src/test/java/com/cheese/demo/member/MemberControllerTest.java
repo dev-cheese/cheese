@@ -2,7 +2,7 @@ package com.cheese.demo.member;
 
 import com.cheese.demo.SpringServerApplication;
 import com.cheese.demo.commons.ErrorCodeEnum;
-import com.cheese.demo.mock.UserMock;
+import com.cheese.demo.mock.MemberMock;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,11 +61,11 @@ public class MemberControllerTest {
     @Autowired
     private MemberRepository memberRepository;
     private MockMvc mockMvc;
-    private UserMock userMock;
+    private MemberMock memberMock;
 
     @Before
     public void setUp() {
-        userMock = new UserMock();
+        memberMock = new MemberMock();
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .addFilter(springSecurityFilterChain)
                 .build();
@@ -74,7 +74,7 @@ public class MemberControllerTest {
     //    회원가입
     @Test
     public void When_signUp_expect_succeed() throws Exception {
-        MemberDto.SignUpReq dto = userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
+        MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -84,8 +84,8 @@ public class MemberControllerTest {
     //    이메일 중복 예외
     @Test
     public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
-        MemberDto.SignUpReq dto = userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
-        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
+        memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
 
         requestSignUp(dto)
                 .andDo(print())
@@ -97,22 +97,22 @@ public class MemberControllerTest {
     //    이메일 유효성 예외
     @Test
     public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
-        MemberDto.SignUpReq email_type_validation = userMock.setSignUpDto("not_email_validate", PASSWORD, RE_PASSWORD);
+        MemberDto.SignUpReq email_type_validation = memberMock.setSignUpDto("not_email_validate", PASSWORD, RE_PASSWORD);
         requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
     //    비밀번호 유호성 예외
     @Test
     public void When_passwordIsNotValidated_expect_INVALID_INPUTS() throws Exception {
-        MemberDto.SignUpReq password_length_validation = userMock.setSignUpDto(EMAIL, "123456", "123456");
+        MemberDto.SignUpReq password_length_validation = memberMock.setSignUpDto(EMAIL, "123456", "123456");
         requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_INPUTS);
     }
 
     //    회원 정보 수정
     @Test
     public void When_myAccountUpdate_expect_succeed() throws Exception {
-        Member member = memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
-        MemberDto.MyAccountReq dto = userMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
+        Member member = memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        MemberDto.MyAccountReq dto = memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
 
         requestMyAccount(dto, member.getId())
                 .andExpect(status().isOk())
@@ -125,8 +125,8 @@ public class MemberControllerTest {
     //    없는 유저 업데이트시 404
     @Test
     public void When_notExistedUser_expect_USER_NOT_FOUND() throws Exception {
-        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
-        MemberDto.MyAccountReq dto = userMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
+        memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        MemberDto.MyAccountReq dto = memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
 
         requestMyAccount(dto, 0L)
                 .andExpect(status().isBadRequest())
@@ -137,7 +137,7 @@ public class MemberControllerTest {
     //    특정 유저 조회
     @Test
     public void When_getUser_expect_succeed() throws Exception {
-        Member member = memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        Member member = memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         RequestGetUser(member.getId())
                 .andExpect(status().isOk());
     }
@@ -145,7 +145,7 @@ public class MemberControllerTest {
     //   없는 유저 조회시 404
     @Test
     public void When_getUserNotExisted_expect_USER_NOT_FOUND() throws Exception {
-        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         RequestGetUser(0L)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
@@ -218,7 +218,7 @@ public class MemberControllerTest {
     // 이메일 존재 유무 검사
     @Test
     public void When_emailIsExist_expect_true() throws Exception {
-        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         requestExists(EMAIL)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.existence", is(true)));
@@ -236,7 +236,7 @@ public class MemberControllerTest {
     //권한 없는 사용자가 특정 유저 업데이트했을 경우
     @Test
     public void When_updateUserWithUnauthorized_expect_401() throws Exception {
-        MemberDto.MyAccountReq dto = userMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
+        MemberDto.MyAccountReq dto = memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
         requestMyAccount(dto, 0L)
                 .andExpect(status().isUnauthorized());
     }
@@ -299,11 +299,11 @@ public class MemberControllerTest {
 
     private void eachCreateUser(final int endExclusive) {
         IntStream.range(0, endExclusive).forEach(i ->
-                memberService.create(userMock.setSignUpDto(i + EMAIL, PASSWORD, RE_PASSWORD)));
+                memberService.create(memberMock.setSignUpDto(i + EMAIL, PASSWORD, RE_PASSWORD)));
     }
 
     private Member createAdmin() {
-        Member admin = memberService.create(userMock.setSignUpDto(ADMIN_EMAIL, PASSWORD, RE_PASSWORD));
+        Member admin = memberService.create(memberMock.setSignUpDto(ADMIN_EMAIL, PASSWORD, RE_PASSWORD));
         admin.setRole(MemberRoleEnum.ADMIN);
         return memberRepository.save(admin);
     }

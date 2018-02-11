@@ -4,7 +4,7 @@ import com.cheese.demo.member.MemberDto;
 
 import java.sql.Date;
 
-public class UserMock {
+public class MemberMock {
 
     public MemberDto.SignUpReq setSignUpDto(String email, String password, String rePassword) {
         MemberDto.SignUpReq signUpReqDto = new MemberDto.SignUpReq();
