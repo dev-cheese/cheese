@@ -29,22 +29,18 @@ public class MemberService {
     private PasswordEncoder passwordEncoder;
 
 
-    // TODO: 2018. 1. 31. 비밀번호 및 이메일 발리데이션 추가할것
-    // TODO: 2018. 1. 31. 모델 라이브러리 사용하면 더 좋을 거같음
+    @Transactional
     public Member create(MemberDto.SignUpReq dto) {
         final String email = dto.getEmail();
 
         if (isDuplicatedEmail(email))
             throw new EmailDuplicationException(email);
 
-
         dto.setPassword(encodePassword(dto.getPassword()));
-
         return memberRepository.save(modelMapper.map(dto, Member.class));
     }
 
-    // TODO: 2018. 2. 6. 접근 권한 추가해야함 -yun
-
+    @Transactional
     public Member update(Long id, MemberDto.MyAccountReq dto) {
         Member member = findById(id);
         member.setLastName(dto.getLastName());

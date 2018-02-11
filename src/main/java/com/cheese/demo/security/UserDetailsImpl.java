@@ -15,12 +15,9 @@ public class UserDetailsImpl extends User {
         super(member.getEmail(), member.getPassword(), authorities(member));
     }
 
-    private static Collection<? extends GrantedAuthority> authorities(Member member) {
+    private static Collection<? extends GrantedAuthority> authorities(final Member member) {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        if (member.isAdmin()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        }
+        authorities.add(new SimpleGrantedAuthority(member.getRole().getName()));
         return authorities;
     }
 }

@@ -43,6 +43,9 @@ public class Member extends EntityBaseDateTime {
     @Column(name = "dob", columnDefinition = "DATE")
     private Date dob;
 
-    @Column(name = "admin")
-    private boolean admin;
+    // TODO: 2018. 2. 12. MemberRoleEnum.USER; 박아도 해도 상관 없는 걸까? -yun
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, columnDefinition = "varchar(20) default 'USER'")
+    private MemberRoleEnum role = MemberRoleEnum.USER;
+
 }

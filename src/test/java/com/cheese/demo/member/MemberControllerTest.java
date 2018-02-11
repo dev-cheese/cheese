@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,24 +39,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class MemberControllerTest {
 
+
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final String PASSWORD = "password001";
+    private final String RE_PASSWORD = "password001";
+    private final String EMAIL = "cheese10yun@gmail.com";
+
     private final String FIRST_NAME = "길동";
     private final String LAST_NAME = "홍";
     private final String MOBILE = "01071333262";
     private final Date DOB = Date.valueOf(LocalDate.now());
-    private final String MEMBERS_URL_PATH = "/members";
+    private final String ADMIN_EMAIL = "admin001@gmail.com";
     @Autowired
     private FilterChainProxy springSecurityFilterChain;
     @Autowired
     private MemberService memberService;
-    private final String password = "password001";
-    private final String rePassword = "password001";
-    private final String email = "cheese10yun@gmail.com";
+    @Autowired
+    private MemberRepository memberRepository;
     private MockMvc mockMvc;
     private UserMock userMock;
 
@@ -70,7 +75,7 @@ public class MemberControllerTest {
     //    회원가입
     @Test
     public void When_signUp_expect_succeed() throws Exception {
-        MemberDto.SignUpReq dto = userMock.setSignUpDto(email, password, rePassword);
+        MemberDto.SignUpReq dto = userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -80,8 +85,8 @@ public class MemberControllerTest {
     //    이메일 중복 예외
     @Test
     public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
-        MemberDto.SignUpReq dto = userMock.setSignUpDto(email, password, rePassword);
-        memberService.create(userMock.setSignUpDto(email, password, rePassword));
+        MemberDto.SignUpReq dto = userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
+        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
 
         requestSignUp(dto)
                 .andDo(print())
@@ -93,21 +98,21 @@ public class MemberControllerTest {
     //    이메일 유효성 예외
     @Test
     public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
-        MemberDto.SignUpReq email_type_validation = userMock.setSignUpDto("not_email_validate", password, rePassword);
+        MemberDto.SignUpReq email_type_validation = userMock.setSignUpDto("not_email_validate", PASSWORD, RE_PASSWORD);
         requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
     //    비밀번호 유호성 예외
     @Test
     public void When_passwordIsNotValidated_expect_INVALID_INPUTS() throws Exception {
-        MemberDto.SignUpReq password_length_validation = userMock.setSignUpDto(email, "123456", "123456");
+        MemberDto.SignUpReq password_length_validation = userMock.setSignUpDto(EMAIL, "123456", "123456");
         requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_INPUTS);
     }
 
     //    회원 정보 수정
     @Test
     public void When_myAccountUpdate_expect_succeed() throws Exception {
-        Member member = memberService.create(userMock.setSignUpDto(email, password, rePassword));
+        Member member = memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         MemberDto.MyAccountReq dto = userMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
 
         requestMyAccount(dto, member.getId())
@@ -121,6 +126,7 @@ public class MemberControllerTest {
     //    없는 유저 업데이트시 404
     @Test
     public void When_notExistedUser_expect_USER_NOT_FOUND() throws Exception {
+        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         MemberDto.MyAccountReq dto = userMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
 
         requestMyAccount(dto, 0L)
@@ -132,7 +138,7 @@ public class MemberControllerTest {
     //    특정 유저 조회
     @Test
     public void When_getUser_expect_succeed() throws Exception {
-        Member member = memberService.create(userMock.setSignUpDto(email, password, rePassword));
+        Member member = memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         RequestGetUser(member.getId())
                 .andExpect(status().isOk());
     }
@@ -140,7 +146,7 @@ public class MemberControllerTest {
     //   없는 유저 조회시 404
     @Test
     public void When_getUserNotExisted_expect_USER_NOT_FOUND() throws Exception {
-
+        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         RequestGetUser(0L)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
@@ -150,6 +156,7 @@ public class MemberControllerTest {
     //    유저 페이지 조회
     @Test
     public void When_getUsers_expect_succeed() throws Exception {
+        createAdmin(); // 유저 조회를 위해 관리자 계정 생성
         eachCreateUser(20);
         requestGetUsers()
                 .andExpect(status().isOk())
@@ -166,6 +173,7 @@ public class MemberControllerTest {
     //    유저 2 페이지 조회
     @Test
     public void When_getUserPage2_expect_succeed() throws Exception {
+        createAdmin(); // 유저 조회를 위해 관리자 계정 생성
         eachCreateUser(20);
         final int size = 10;
         final int page = 2;
@@ -182,8 +190,10 @@ public class MemberControllerTest {
     }
 
     //    페이지 사이즈 50 이상일 경우 10으로 강제 지정
+
     @Test
     public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
+        createAdmin(); // 유저 조회를 위해 관리자 계정 생성
         eachCreateUser(20);
         final int size = 51;
         final int page = 2;
@@ -198,55 +208,60 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.first", is(instanceOf(Boolean.class))))
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
+    // 이메일 존재 유무 검사
 
     @Test
-    public void When_emailNotExist_expect_false() throws Exception {
-        requestExists("email", email)
+    public void When_emailIsNotExist_expect_false() throws Exception {
+        requestExists(EMAIL)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.existence", is(false)));
     }
+    // 이메일 존재 유무 검사
 
     @Test
-    public void When_emailExist_expect_true() throws Exception {
-        memberService.create(userMock.setSignUpDto(email, password, rePassword));
-        requestExists("email", email)
+    public void When_emailIsExist_expect_true() throws Exception {
+        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        requestExists(EMAIL)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.existence", is(true)));
     }
 
-    private ResultActions requestExists(String type, String value) throws Exception {
-        return mockMvc.perform(get(getUrlExistsTemplate(type, value))
+    private ResultActions requestExists(String value) throws Exception {
+        return mockMvc.perform(get(getUrlExistsTemplate(value))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
     }
 
-    private String getUrlExistsTemplate(String type, String value) {
-        return MEMBERS_URL_PATH + "/exists?" + type + "=" + value;
+    private String getUrlExistsTemplate(String value) {
+        return "/members" + "/exists?email=" + value;
     }
 
     private ResultActions requestGetUsers() throws Exception {
-        return mockMvc.perform(get(MEMBERS_URL_PATH + "/"))
+        return mockMvc.perform(get("/members" + "/")
+                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
                 .andDo(print());
     }
 
     private ResultActions requestGetUsersInPage(int page, int size) throws Exception {
-        return mockMvc.perform(get(getUrlPageTemplate(page, size)))
+        return mockMvc.perform(get(getUrlPageTemplate(page, size))
+                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
                 .andDo(print());
     }
 
     private String getUrlPageTemplate(int page, int size) {
-        return MEMBERS_URL_PATH + "?page=" + page + "&size=" + size;
+        return "/members" + "?page=" + page + "&size=" + size;
     }
 
     private ResultActions RequestGetUser(Long id) throws Exception {
-        return mockMvc.perform(get(MEMBERS_URL_PATH + "/" + id)
-//                .with(httpBasic(email, password))
+        return mockMvc.perform(get("/members" + "/" + id)
+                .with(httpBasic(EMAIL, PASSWORD))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
     }
 
     private ResultActions requestMyAccount(MemberDto.MyAccountReq dto, Long id) throws Exception {
-        return mockMvc.perform(put(MEMBERS_URL_PATH + "/" + id)
+        return mockMvc.perform(put("/members" + "/" + id)
+                .with(httpBasic(EMAIL, PASSWORD))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print());
@@ -261,13 +276,19 @@ public class MemberControllerTest {
     }
 
     private ResultActions requestSignUp(MemberDto.SignUpReq signUpReqDto) throws Exception {
-        return mockMvc.perform(post(MEMBERS_URL_PATH)
+        return mockMvc.perform(post("/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signUpReqDto)));
     }
 
     private void eachCreateUser(final int endExclusive) {
         IntStream.range(0, endExclusive).forEach(i ->
-                memberService.create(userMock.setSignUpDto(i + email, password, rePassword)));
+                memberService.create(userMock.setSignUpDto(i + EMAIL, PASSWORD, RE_PASSWORD)));
+    }
+
+    private Member createAdmin() {
+        Member admin = memberService.create(userMock.setSignUpDto(ADMIN_EMAIL, PASSWORD, RE_PASSWORD));
+        admin.setRole(MemberRoleEnum.ADMIN);
+        return memberRepository.save(admin);
     }
 }

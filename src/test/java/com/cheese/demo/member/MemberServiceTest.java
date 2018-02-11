@@ -23,9 +23,9 @@ public class MemberServiceTest {
     @Autowired
     private MemberService memberService;
 
-    private final String email = "cheese10yun@gmail.com";
-    private final String password = "password001";
-    private final String rePassword = "password001";
+    private final String EMAIL = "cheese10yun@gmail.com";
+    private final String PASSWORD = "password001";
+    private final String RE_PASSWORD = "password001";
     private UserMock userMock;
 
     @Before
@@ -35,14 +35,15 @@ public class MemberServiceTest {
 
     @Test
     public void When_emailIsExisted_expect_userReturn() {
-        memberService.create(userMock.setSignUpDto(email, password, rePassword));
-        Member member = memberService.findByEmail(email);
+        memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        Member member = memberService.findByEmail(EMAIL);
         assertThat(member, is(notNullValue()));
-        assertThat(member.getEmail(), is(email));
+        assertThat(member.getEmail(), is(EMAIL));
     }
 
     @Test(expected = UserNotFoundException.class)
     public void When_emailIsNotExisted_expect_UserNotFoundException() {
         memberService.findByEmail("notExistedEmail@test.com");
     }
+
 }

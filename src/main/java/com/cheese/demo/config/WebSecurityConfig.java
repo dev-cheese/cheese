@@ -2,6 +2,7 @@ package com.cheese.demo.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -13,6 +14,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final String ADMIN = "ADMIN";
+    private final String USER = "USER";
+    private final String MEMBER_URL_PATH = "/members";
 
     @Autowired
     public WebSecurityConfig(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
@@ -29,13 +33,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.httpBasic();
-        http.authorizeRequests()
-//                .antMatchers(HttpMethod.GET, "/members/{id}").hasRole("USER")
 
-//                .antMatchers(HttpMethod.GET, "/users/**").hasRole("USER")
-//                .antMatchers(HttpMethod.PUT, "/users/**").hasRole("USER")
-//                .antMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
-                .anyRequest().permitAll();
+        http.authorizeRequests()
+//                .anyRequest().permitAll();
+                .antMatchers(HttpMethod.POST, MEMBER_URL_PATH).permitAll()
+                .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/exists**").permitAll()
+                .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/{id}").hasAnyRole(USER, ADMIN)
+                .antMatchers(HttpMethod.PUT, MEMBER_URL_PATH + "/{id}").hasAnyRole(USER, ADMIN)
+                .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/**").hasRole(ADMIN)
+                .anyRequest().denyAll();
     }
 
 }
