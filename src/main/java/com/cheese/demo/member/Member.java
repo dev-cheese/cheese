@@ -1,4 +1,4 @@
-package com.cheese.demo.user;
+package com.cheese.demo.member;
 
 import com.cheese.demo.commons.EntityBaseDateTime;
 import lombok.AccessLevel;
@@ -9,25 +9,25 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
-import javax.validation.constraints.Pattern;
 import java.sql.Date;
 
 @Entity
-@Table(name = "user")
+@Table(name = "member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Setter
-public class User extends EntityBaseDateTime {
+public class Member extends EntityBaseDateTime {
+
     @Id
     @GeneratedValue
     private Long id;
 
+    @NotEmpty
     @Email
     @Column(name = "email", updatable = false, nullable = false, unique = true)
     private String email;
 
     @NotEmpty
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "비밀번호는 문자, 숫자 포함 8자리 이상")
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -42,4 +42,10 @@ public class User extends EntityBaseDateTime {
 
     @Column(name = "dob", columnDefinition = "DATE")
     private Date dob;
+
+    // TODO: 2018. 2. 12. MemberRoleEnum.USER; 박아도 해도 상관 없는 걸까? -yun
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, columnDefinition = "varchar(20) default 'USER'")
+    private MemberRoleEnum role = MemberRoleEnum.USER;
+
 }

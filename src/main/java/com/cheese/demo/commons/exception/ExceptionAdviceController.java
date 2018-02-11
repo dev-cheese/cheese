@@ -2,8 +2,8 @@ package com.cheese.demo.commons.exception;
 
 import com.cheese.demo.commons.ErrorCodeEnum;
 import com.cheese.demo.commons.ErrorResponse;
-import com.cheese.demo.user.exception.EmailDuplicationException;
-import com.cheese.demo.user.exception.UserNotFoundException;
+import com.cheese.demo.member.exception.EmailDuplicationException;
+import com.cheese.demo.member.exception.MemberNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,7 @@ public class ExceptionAdviceController {
 
     @ExceptionHandler(value = {
             EmailDuplicationException.class,
-            UserNotFoundException.class
+            MemberNotFoundException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
