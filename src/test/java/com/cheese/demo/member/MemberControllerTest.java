@@ -39,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class MemberControllerTest {
 
-
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -224,6 +223,24 @@ public class MemberControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.existence", is(true)));
     }
+
+    //ACL 검사
+
+    //권한 없는 사용자가 특정 유저 조회했을 경우
+    @Test
+    public void When_getUserWithUnauthorized_expect_401() throws Exception {
+        RequestGetUser(0L)
+                .andExpect(status().isUnauthorized());
+    }
+
+    //권한 없는 사용자가 특정 유저 업데이트했을 경우
+    @Test
+    public void When_updateUserWithUnauthorized_expect_401() throws Exception {
+        MemberDto.MyAccountReq dto = userMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
+        requestMyAccount(dto, 0L)
+                .andExpect(status().isUnauthorized());
+    }
+    //ACL 검사
 
     private ResultActions requestExists(String value) throws Exception {
         return mockMvc.perform(get(getUrlExistsTemplate(value))
