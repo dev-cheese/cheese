@@ -190,7 +190,6 @@ public class MemberControllerTest {
     }
 
     //    페이지 사이즈 50 이상일 경우 10으로 강제 지정
-
     @Test
     public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
         createAdmin(); // 유저 조회를 위해 관리자 계정 생성
@@ -208,16 +207,16 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.first", is(instanceOf(Boolean.class))))
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
-    // 이메일 존재 유무 검사
 
+    // 이메일 존재 유무 검사
     @Test
     public void When_emailIsNotExist_expect_false() throws Exception {
         requestExists(EMAIL)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.existence", is(false)));
     }
-    // 이메일 존재 유무 검사
 
+    // 이메일 존재 유무 검사
     @Test
     public void When_emailIsExist_expect_true() throws Exception {
         memberService.create(userMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));

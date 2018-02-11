@@ -35,7 +35,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic();
 
         http.authorizeRequests()
-//                .anyRequest().permitAll();
                 .antMatchers(HttpMethod.POST, MEMBER_URL_PATH).permitAll()
                 .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/exists**").permitAll()
                 .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/{id}").hasAnyRole(USER, ADMIN)
