@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,9 @@ public class UserService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     // TODO: 2018. 1. 31. 비밀번호 및 이메일 발리데이션 추가할것
     // TODO: 2018. 1. 31. 모델 라이브러리 사용하면 더 좋을 거같음
@@ -33,10 +37,14 @@ public class UserService {
         if (isDuplicatedEmail(email))
             throw new EmailDuplicationException(email);
 
+
+        dto.setPassword(encodePassword(dto.getPassword()));
+
         return userRepository.save(modelMapper.map(dto, User.class));
     }
 
     // TODO: 2018. 2. 6. 접근 권한 추가해야함 -yun
+
     public User update(Long id, UserDto.MyAccountReq dto) {
         User user = findById(id);
         user.setLastName(dto.getLastName());
@@ -45,7 +53,6 @@ public class UserService {
         user.setDob(dto.getDob());
         return user;
     }
-
 
     public PageImpl<UserDto.Res> findAll(Pageable pageable) {
         Page<User> page = userRepository.findAll(pageable);
@@ -59,6 +66,14 @@ public class UserService {
             return user;
         else
             throw new UserNotFoundException(id);
+    }
+
+    public User findByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user != null)
+            return user;
+        else
+            throw new UserNotFoundException(email);
     }
 
     public CommonDto.ExistenceRes isExist(String email) {
@@ -76,5 +91,9 @@ public class UserService {
                 .parallelStream()
                 .map(user -> modelMapper.map(user, UserDto.Res.class))
                 .collect(Collectors.toList());
+    }
+
+    private String encodePassword(String password) {
+        return passwordEncoder.encode(password);
     }
 }

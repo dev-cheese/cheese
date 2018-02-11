@@ -3,21 +3,24 @@ package com.cheese.demo.user;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.Pattern;
 import java.sql.Date;
 
 public class UserDto {
 
     @Getter
     @Setter
-    static class SignUpReq {
+    public static class SignUpReq {
         private String email;
+        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$")
         private String password;
+        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$")
         private String rePassword;
     }
 
     @Getter
     @Setter
-    static class MyAccountReq {
+    public static class MyAccountReq {
         private String lastName;
         private String firstName;
         private String mobile;
@@ -26,7 +29,7 @@ public class UserDto {
 
     @Getter
     @Setter
-    static class Res {
+    public static class Res {
         private Long id;
         private String email;
         private String lastName;

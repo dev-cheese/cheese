@@ -9,7 +9,6 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
-import javax.validation.constraints.Pattern;
 import java.sql.Date;
 
 @Entity
@@ -18,16 +17,17 @@ import java.sql.Date;
 @Getter
 @Setter
 public class User extends EntityBaseDateTime {
+
     @Id
     @GeneratedValue
     private Long id;
 
+    @NotEmpty
     @Email
     @Column(name = "email", updatable = false, nullable = false, unique = true)
     private String email;
 
     @NotEmpty
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", message = "비밀번호는 문자, 숫자 포함 8자리 이상")
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -42,4 +42,7 @@ public class User extends EntityBaseDateTime {
 
     @Column(name = "dob", columnDefinition = "DATE")
     private Date dob;
+
+    @Column(name = "admin")
+    private boolean admin;
 }

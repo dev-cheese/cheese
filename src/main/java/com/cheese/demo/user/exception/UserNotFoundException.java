@@ -11,5 +11,10 @@ public class UserNotFoundException extends RuntimeException {
         log.error(ErrorCodeEnum.USER_NOT_FOUND.getMessage(), id);
     }
 
+    public UserNotFoundException(String email) {
+        super(String.valueOf(ErrorCodeEnum.USER_NOT_FOUND));
+        log.error(ErrorCodeEnum.USER_NOT_FOUND.getMessage(), email);
+    }
+
 }
 

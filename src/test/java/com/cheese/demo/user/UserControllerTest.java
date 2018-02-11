@@ -2,6 +2,7 @@ package com.cheese.demo.user;
 
 import com.cheese.demo.SpringServerApplication;
 import com.cheese.demo.commons.ErrorCodeEnum;
+import com.cheese.demo.mock.UserMock;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,6 +26,7 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,12 +48,16 @@ public class UserControllerTest {
     @Autowired
     private UserService userService;
 
+    private final String password = "password001";
+
     private MockMvc mockMvc;
+    private final String rePassword = "password001";
 
 
     private final String email = "cheese10yun@gmail.com";
-    private final String password = "passwordIsValidated001";
-    private final String rePassword = "passwordIsValidated001";
+    @Autowired
+    private FilterChainProxy springSecurityFilterChain;
+    private UserMock userMock;
     private final String firstName = "길동";
     private final String lastName = "홍";
     private final String mobile = "01071333262";
@@ -58,14 +65,16 @@ public class UserControllerTest {
 
     @Before
     public void setUp() {
+        userMock = new UserMock();
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .addFilter(springSecurityFilterChain)
                 .build();
     }
 
     //    회원가입
     @Test
     public void When_signUp_expect_succeed() throws Exception {
-        UserDto.SignUpReq dto = setSignUpDto(email, password, rePassword);
+        UserDto.SignUpReq dto = userMock.setSignUpDto(email, password, rePassword);
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -75,8 +84,8 @@ public class UserControllerTest {
     //    이메일 중복 예외
     @Test
     public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
-        UserDto.SignUpReq dto = setSignUpDto(email, password, rePassword);
-        userService.create(dto);
+        UserDto.SignUpReq dto = userMock.setSignUpDto(email, password, rePassword);
+        userService.create(userMock.setSignUpDto(email, password, rePassword));
 
         requestSignUp(dto)
                 .andDo(print())
@@ -88,22 +97,22 @@ public class UserControllerTest {
     //    이메일 유효성 예외
     @Test
     public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
-        UserDto.SignUpReq email_type_validation = setSignUpDto("not_email_validate", password, rePassword);
+        UserDto.SignUpReq email_type_validation = userMock.setSignUpDto("not_email_validate", password, rePassword);
         requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
     //    비밀번호 유호성 예외
     @Test
-    public void When_passwordIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
-        UserDto.SignUpReq password_length_validation = setSignUpDto(email, "123456", "123456");
-        requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_DOMAIN);
+    public void When_passwordIsNotValidated_expect_INVALID_INPUTS() throws Exception {
+        UserDto.SignUpReq password_length_validation = userMock.setSignUpDto(email, "123456", "123456");
+        requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_INPUTS);
     }
 
     //    회원 정보 수정
     @Test
     public void When_myAccountUpdate_expect_succeed() throws Exception {
-        User user = userService.create(setSignUpDto(email, password, rePassword));
-        UserDto.MyAccountReq dto = setMyAccountDto(firstName, lastName, mobile, dob);
+        User user = userService.create(userMock.setSignUpDto(email, password, rePassword));
+        UserDto.MyAccountReq dto = userMock.setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, user.getId())
                 .andExpect(status().isOk())
@@ -116,7 +125,7 @@ public class UserControllerTest {
     //    없는 유저 업데이트시 404
     @Test
     public void When_notExistedUser_expect_USER_NOT_FOUND() throws Exception {
-        UserDto.MyAccountReq dto = setMyAccountDto(firstName, lastName, mobile, dob);
+        UserDto.MyAccountReq dto = userMock.setMyAccountDto(firstName, lastName, mobile, dob);
 
         requestMyAccount(dto, 0L)
                 .andExpect(status().isBadRequest())
@@ -127,7 +136,7 @@ public class UserControllerTest {
     //    특정 유저 조회
     @Test
     public void When_getUser_expect_succeed() throws Exception {
-        User user = userService.create(setSignUpDto(email, password, rePassword));
+        User user = userService.create(userMock.setSignUpDto(email, password, rePassword));
         RequestGetUser(user.getId())
                 .andExpect(status().isOk());
     }
@@ -203,7 +212,7 @@ public class UserControllerTest {
 
     @Test
     public void When_emailExist_expect_true() throws Exception {
-        userService.create(setSignUpDto(email, password, rePassword));
+        userService.create(userMock.setSignUpDto(email, password, rePassword));
         requestExists("email", email)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.existence", is(true)));
@@ -235,6 +244,7 @@ public class UserControllerTest {
 
     private ResultActions RequestGetUser(Long id) throws Exception {
         return mockMvc.perform(get("/users/" + id)
+                .with(httpBasic(email, password))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
     }
@@ -254,23 +264,23 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.code", is(invalidInputs.getCode())));
     }
 
-    private UserDto.SignUpReq setSignUpDto(String email, String password, String rePassword) {
-        UserDto.SignUpReq signUpReqDto = new UserDto.SignUpReq();
-        signUpReqDto.setEmail(email);
-        signUpReqDto.setPassword(password);
-        signUpReqDto.setRePassword(rePassword);
-        return signUpReqDto;
-    }
-
-    private UserDto.MyAccountReq setMyAccountDto(String firstName, String lastName, String mobile, Date dob) {
-        UserDto.MyAccountReq dto = new UserDto.MyAccountReq();
-
-        dto.setFirstName(firstName);
-        dto.setLastName(lastName);
-        dto.setMobile(mobile);
-        dto.setDob(dob);
-        return dto;
-    }
+//    private UserDto.SignUpReq setSignUpDto(String email, String password, String rePassword) {
+//        UserDto.SignUpReq signUpReqDto = new UserDto.SignUpReq();
+//        signUpReqDto.setEmail(email);
+//        signUpReqDto.setPassword(password);
+//        signUpReqDto.setRePassword(rePassword);
+//        return signUpReqDto;
+//    }
+//
+//    private UserDto.MyAccountReq setMyAccountDto(String firstName, String lastName, String mobile, Date dob) {
+//        UserDto.MyAccountReq dto = new UserDto.MyAccountReq();
+//
+//        dto.setFirstName(firstName);
+//        dto.setLastName(lastName);
+//        dto.setMobile(mobile);
+//        dto.setDob(dob);
+//        return dto;
+//    }
 
     private ResultActions requestSignUp(UserDto.SignUpReq signUpReqDto) throws Exception {
         return mockMvc.perform(post("/users")
@@ -280,6 +290,6 @@ public class UserControllerTest {
 
     private void eachCreateUser(final int endExclusive) {
         IntStream.range(0, endExclusive).forEach(i ->
-                userService.create(setSignUpDto(i + email, password, rePassword)));
+                userService.create(userMock.setSignUpDto(i + email, password, rePassword)));
     }
 }
