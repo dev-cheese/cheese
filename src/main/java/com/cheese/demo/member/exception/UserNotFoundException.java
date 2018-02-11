@@ -1,4 +1,4 @@
-package com.cheese.demo.user.exception;
+package com.cheese.demo.member.exception;
 
 import com.cheese.demo.commons.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;

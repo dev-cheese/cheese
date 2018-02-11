@@ -1,8 +1,8 @@
-package com.cheese.demo.user;
+package com.cheese.demo.member;
 
 import com.cheese.demo.commons.CommonDto;
-import com.cheese.demo.user.exception.EmailDuplicationException;
-import com.cheese.demo.user.exception.UserNotFoundException;
+import com.cheese.demo.member.exception.EmailDuplicationException;
+import com.cheese.demo.member.exception.UserNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class UserService {
+public class MemberService {
 
     @Autowired
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -31,7 +31,7 @@ public class UserService {
 
     // TODO: 2018. 1. 31. 비밀번호 및 이메일 발리데이션 추가할것
     // TODO: 2018. 1. 31. 모델 라이브러리 사용하면 더 좋을 거같음
-    public User create(UserDto.SignUpReq dto) {
+    public Member create(MemberDto.SignUpReq dto) {
         final String email = dto.getEmail();
 
         if (isDuplicatedEmail(email))
@@ -40,38 +40,38 @@ public class UserService {
 
         dto.setPassword(encodePassword(dto.getPassword()));
 
-        return userRepository.save(modelMapper.map(dto, User.class));
+        return memberRepository.save(modelMapper.map(dto, Member.class));
     }
 
     // TODO: 2018. 2. 6. 접근 권한 추가해야함 -yun
 
-    public User update(Long id, UserDto.MyAccountReq dto) {
-        User user = findById(id);
-        user.setLastName(dto.getLastName());
-        user.setFirstName(dto.getFirstName());
-        user.setMobile(dto.getMobile());
-        user.setDob(dto.getDob());
-        return user;
+    public Member update(Long id, MemberDto.MyAccountReq dto) {
+        Member member = findById(id);
+        member.setLastName(dto.getLastName());
+        member.setFirstName(dto.getFirstName());
+        member.setMobile(dto.getMobile());
+        member.setDob(dto.getDob());
+        return member;
     }
 
-    public PageImpl<UserDto.Res> findAll(Pageable pageable) {
-        Page<User> page = userRepository.findAll(pageable);
-        List<UserDto.Res> content = convertResDto(page);
+    public PageImpl<MemberDto.Res> findAll(Pageable pageable) {
+        Page<Member> page = memberRepository.findAll(pageable);
+        List<MemberDto.Res> content = convertResDto(page);
         return new PageImpl<>(content, pageable, page.getTotalElements());
     }
 
-    public User findById(Long id) {
-        User user = userRepository.findOne(id);
-        if (user != null)
-            return user;
+    public Member findById(Long id) {
+        Member member = memberRepository.findOne(id);
+        if (member != null)
+            return member;
         else
             throw new UserNotFoundException(id);
     }
 
-    public User findByEmail(String email) {
-        User user = userRepository.findByEmail(email);
-        if (user != null)
-            return user;
+    public Member findByEmail(String email) {
+        Member member = memberRepository.findByEmail(email);
+        if (member != null)
+            return member;
         else
             throw new UserNotFoundException(email);
     }
@@ -83,13 +83,13 @@ public class UserService {
     }
 
     private boolean isDuplicatedEmail(String email) {
-        return userRepository.findByEmail(email) != null;
+        return memberRepository.findByEmail(email) != null;
     }
 
-    private List<UserDto.Res> convertResDto(Page<User> page) {
+    private List<MemberDto.Res> convertResDto(Page<Member> page) {
         return page.getContent()
                 .parallelStream()
-                .map(user -> modelMapper.map(user, UserDto.Res.class))
+                .map(member -> modelMapper.map(member, MemberDto.Res.class))
                 .collect(Collectors.toList());
     }
 

@@ -2,7 +2,6 @@ package com.cheese.demo.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -12,11 +11,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    public WebSecurityConfig(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+        this.passwordEncoder = passwordEncoder;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -28,11 +30,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.httpBasic();
         http.authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/users/{id}").hasRole("USER")
+//                .antMatchers(HttpMethod.GET, "/members/{id}").hasRole("USER")
+
 //                .antMatchers(HttpMethod.GET, "/users/**").hasRole("USER")
 //                .antMatchers(HttpMethod.PUT, "/users/**").hasRole("USER")
 //                .antMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
-                .anyRequest().denyAll();
+                .anyRequest().permitAll();
     }
 
 }

@@ -1,4 +1,4 @@
-package com.cheese.demo.user;
+package com.cheese.demo.member;
 
 import com.cheese.demo.commons.EntityBaseDateTime;
 import lombok.AccessLevel;
@@ -12,11 +12,11 @@ import javax.persistence.*;
 import java.sql.Date;
 
 @Entity
-@Table(name = "user")
+@Table(name = "member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Setter
-public class User extends EntityBaseDateTime {
+public class Member extends EntityBaseDateTime {
 
     @Id
     @GeneratedValue

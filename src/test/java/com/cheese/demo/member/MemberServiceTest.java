@@ -1,8 +1,8 @@
-package com.cheese.demo.user;
+package com.cheese.demo.member;
 
 import com.cheese.demo.SpringServerApplication;
+import com.cheese.demo.member.exception.UserNotFoundException;
 import com.cheese.demo.mock.UserMock;
-import com.cheese.demo.user.exception.UserNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,10 +18,10 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SpringServerApplication.class)
 @Transactional
-public class UserServiceTest {
+public class MemberServiceTest {
 
     @Autowired
-    private UserService userService;
+    private MemberService memberService;
 
     private final String email = "cheese10yun@gmail.com";
     private final String password = "password001";
@@ -35,14 +35,14 @@ public class UserServiceTest {
 
     @Test
     public void When_emailIsExisted_expect_userReturn() {
-        userService.create(userMock.setSignUpDto(email, password, rePassword));
-        User user = userService.findByEmail(email);
-        assertThat(user, is(notNullValue()));
-        assertThat(user.getEmail(), is(email));
+        memberService.create(userMock.setSignUpDto(email, password, rePassword));
+        Member member = memberService.findByEmail(email);
+        assertThat(member, is(notNullValue()));
+        assertThat(member.getEmail(), is(email));
     }
 
     @Test(expected = UserNotFoundException.class)
     public void When_emailIsNotExisted_expect_UserNotFoundException() {
-        userService.findByEmail("notExistedEmail@test.com");
+        memberService.findByEmail("notExistedEmail@test.com");
     }
 }

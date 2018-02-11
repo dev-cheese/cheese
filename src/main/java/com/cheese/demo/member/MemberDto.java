@@ -1,4 +1,4 @@
-package com.cheese.demo.user;
+package com.cheese.demo.member;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 import javax.validation.constraints.Pattern;
 import java.sql.Date;
 
-public class UserDto {
+public class MemberDto {
 
     @Getter
     @Setter

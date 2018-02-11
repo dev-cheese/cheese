@@ -1,4 +1,4 @@
-package com.cheese.demo.user;
+package com.cheese.demo.member;
 
 
 import com.cheese.demo.commons.CommonDto;
@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("users")
-public class UserController {
+@RequestMapping("members")
+public class MemberController {
 
     @Autowired
-    private UserService userService;
+    private MemberService memberService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -24,31 +24,31 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserDto.Res signUp(@RequestBody @Valid UserDto.SignUpReq dto) {
-        return modelMapper.map(userService.create(dto), UserDto.Res.class);
+    public MemberDto.Res signUp(@RequestBody @Valid MemberDto.SignUpReq dto) {
+        return modelMapper.map(memberService.create(dto), MemberDto.Res.class);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
-    public Page<UserDto.Res> getUsers(PageVo pageVo) {
-        return userService.findAll(pageVo.makePageable(0, "id"));
+    public Page<MemberDto.Res> getUsers(PageVo pageVo) {
+        return memberService.findAll(pageVo.makePageable(0, "id"));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
-    public UserDto.Res getUser(@PathVariable Long id) {
-        return modelMapper.map(userService.findById(id), UserDto.Res.class);
+    public MemberDto.Res getUser(@PathVariable Long id) {
+        return modelMapper.map(memberService.findById(id), MemberDto.Res.class);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @ResponseStatus(value = HttpStatus.OK)
-    public UserDto.MyAccountReq update(@PathVariable Long id, @RequestBody UserDto.MyAccountReq dto) {
-        return modelMapper.map(userService.update(id, dto), UserDto.MyAccountReq.class);
+    public MemberDto.MyAccountReq update(@PathVariable Long id, @RequestBody MemberDto.MyAccountReq dto) {
+        return modelMapper.map(memberService.update(id, dto), MemberDto.MyAccountReq.class);
     }
 
     @RequestMapping(value = "/exists", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
     public CommonDto.ExistenceRes isExist(@RequestParam(value = "email") String email) {
-        return userService.isExist(email);
+        return memberService.isExist(email);
     }
 }
