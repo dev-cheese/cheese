@@ -1,14 +1,18 @@
 package com.cheese.demo.commons;
 
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 public class CommonDto {
 
     @Getter
-    @Setter
     public static class ExistenceRes {
         private boolean existence;
+
+        @Builder
+        public ExistenceRes(boolean existence) {
+            this.existence = existence;
+        }
     }
 }

@@ -65,7 +65,6 @@ public class MemberDto {
     }
 
     @Getter
-    @NoArgsConstructor
     public static class Res {
         private Long id;
         private String email;

@@ -1,7 +1,10 @@
 package com.cheese.demo.member;
 
 import com.cheese.demo.commons.EntityBaseDateTime;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -12,7 +15,6 @@ import java.sql.Date;
 @Table(name = "member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
 public class Member extends EntityBaseDateTime {
 
     @Id
