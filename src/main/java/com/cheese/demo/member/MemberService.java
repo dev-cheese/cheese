@@ -3,7 +3,6 @@ package com.cheese.demo.member;
 import com.cheese.demo.commons.CommonDto;
 import com.cheese.demo.member.exception.EmailDuplicationException;
 import com.cheese.demo.member.exception.MemberNotFoundException;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,11 +22,7 @@ public class MemberService {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
-
 
     @Transactional
     public Member create(MemberDto.SignUpReq dto) {
@@ -36,18 +31,15 @@ public class MemberService {
         if (isDuplicatedEmail(email))
             throw new EmailDuplicationException(email);
 
-        dto.setPassword(encodePassword(dto.getPassword()));
-        return memberRepository.save(modelMapper.map(dto, Member.class));
+        final String encodePassword = encodePassword(dto.getPassword());
+        MemberRoleEnum role = MemberRoleEnum.USER;
+
+        return memberRepository.save(dto.toEntity(encodePassword, role));
     }
 
     @Transactional
     public Member update(Long id, MemberDto.MyAccountReq dto) {
-        Member member = findById(id);
-        member.setLastName(dto.getLastName());
-        member.setFirstName(dto.getFirstName());
-        member.setMobile(dto.getMobile());
-        member.setDob(dto.getDob());
-        return member;
+        return dto.toEntity(findById(id));
     }
 
     public PageImpl<MemberDto.Res> findAll(Pageable pageable) {
@@ -85,7 +77,7 @@ public class MemberService {
     private List<MemberDto.Res> convertResDto(Page<Member> page) {
         return page.getContent()
                 .parallelStream()
-                .map(member -> modelMapper.map(member, MemberDto.Res.class))
+                .map(MemberDto.Res::new)
                 .collect(Collectors.toList());
     }
 

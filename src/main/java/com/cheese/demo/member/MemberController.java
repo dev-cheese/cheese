@@ -3,7 +3,6 @@ package com.cheese.demo.member;
 
 import com.cheese.demo.commons.CommonDto;
 import com.cheese.demo.commons.vo.PageVo;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,14 +17,11 @@ public class MemberController {
     @Autowired
     private MemberService memberService;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.CREATED)
     public MemberDto.Res signUp(@RequestBody @Valid MemberDto.SignUpReq dto) {
-        return modelMapper.map(memberService.create(dto), MemberDto.Res.class);
+        return new MemberDto.Res(memberService.create(dto));
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -37,13 +33,13 @@ public class MemberController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
     public MemberDto.Res getUser(@PathVariable Long id) {
-        return modelMapper.map(memberService.findById(id), MemberDto.Res.class);
+        return new MemberDto.Res(memberService.findById(id));
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @ResponseStatus(value = HttpStatus.OK)
-    public MemberDto.MyAccountReq update(@PathVariable Long id, @RequestBody MemberDto.MyAccountReq dto) {
-        return modelMapper.map(memberService.update(id, dto), MemberDto.MyAccountReq.class);
+    public MemberDto.Res update(@PathVariable Long id, @RequestBody MemberDto.MyAccountReq dto) {
+        return new MemberDto.Res(memberService.update(id, dto));
     }
 
     @RequestMapping(value = "/exists", method = RequestMethod.GET)
