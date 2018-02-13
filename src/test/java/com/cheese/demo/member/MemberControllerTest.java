@@ -76,7 +76,6 @@ public class MemberControllerTest {
     public void When_signUp_expect_succeed() throws Exception {
         MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         requestSignUp(dto)
-                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email", is(dto.getEmail())));
     }
@@ -88,7 +87,6 @@ public class MemberControllerTest {
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
 
         requestSignUp(dto)
-                .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.EMAIL_DUPLICATION.getMessage())))
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.EMAIL_DUPLICATION.getCode())));
@@ -155,7 +153,6 @@ public class MemberControllerTest {
     //    유저 페이지 조회
     @Test
     public void When_getUsers_expect_succeed() throws Exception {
-        createAdmin(); // 유저 조회를 위해 관리자 계정 생성
         eachCreateUser(20);
         requestGetUsers()
                 .andExpect(status().isOk())
@@ -172,7 +169,6 @@ public class MemberControllerTest {
     //    유저 2 페이지 조회
     @Test
     public void When_getUserPage2_expect_succeed() throws Exception {
-        createAdmin(); // 유저 조회를 위해 관리자 계정 생성
         eachCreateUser(20);
         final int size = 10;
         final int page = 2;
@@ -191,7 +187,6 @@ public class MemberControllerTest {
     //    페이지 사이즈 50 이상일 경우 10으로 강제 지정
     @Test
     public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
-        createAdmin(); // 유저 조회를 위해 관리자 계정 생성
         eachCreateUser(20);
         final int size = 51;
         final int page = 2;
@@ -294,17 +289,12 @@ public class MemberControllerTest {
     private ResultActions requestSignUp(MemberDto.SignUpReq signUpReqDto) throws Exception {
         return mockMvc.perform(post("/members")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(signUpReqDto)));
+                .content(objectMapper.writeValueAsString(signUpReqDto)))
+                .andDo(print());
     }
 
     private void eachCreateUser(final int endExclusive) {
         IntStream.range(0, endExclusive).forEach(i ->
                 memberService.create(memberMock.setSignUpDto(i + EMAIL, PASSWORD, RE_PASSWORD)));
-    }
-
-    private Member createAdmin() {
-        Member admin = memberService.create(memberMock.setSignUpDto(ADMIN_EMAIL, PASSWORD, RE_PASSWORD));
-        admin.setRole(MemberRoleEnum.ADMIN);
-        return memberRepository.save(admin);
     }
 }

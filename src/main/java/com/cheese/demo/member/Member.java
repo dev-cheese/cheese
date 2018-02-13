@@ -1,10 +1,7 @@
 package com.cheese.demo.member;
 
 import com.cheese.demo.commons.EntityBaseDateTime;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -43,9 +40,20 @@ public class Member extends EntityBaseDateTime {
     @Column(name = "dob", columnDefinition = "DATE")
     private Date dob;
 
-    // TODO: 2018. 2. 12. MemberRoleEnum.USER; 박아도 해도 상관 없는 걸까? -yun
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, columnDefinition = "varchar(20) default 'USER'")
-    private MemberRoleEnum role = MemberRoleEnum.USER;
+    private MemberRoleEnum role;
 
+    // TODO: 2018. 2. 14. ROLE 픽스 된문제 해결 할것 -yun
+    @Builder
+    public Member(long id, String email, String password, String lastName, String firstName, String mobile, Date dob, MemberRoleEnum role) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.mobile = mobile;
+        this.dob = dob;
+        this.role = role;
+    }
 }

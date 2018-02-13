@@ -7,22 +7,19 @@ import java.sql.Date;
 public class MemberMock {
 
     public MemberDto.SignUpReq setSignUpDto(String email, String password, String rePassword) {
-        MemberDto.SignUpReq signUpReqDto = new MemberDto.SignUpReq();
-        signUpReqDto.setEmail(email);
-        signUpReqDto.setPassword(password);
-        signUpReqDto.setRePassword(rePassword);
-        return signUpReqDto;
+        return MemberDto.SignUpReq.builder()
+                .email(email)
+                .password(password)
+                .rePassword(rePassword)
+                .build();
     }
 
     public MemberDto.MyAccountReq setMyAccountDto(String firstName, String lastName, String mobile, Date dob) {
-        MemberDto.MyAccountReq dto = new MemberDto.MyAccountReq();
-
-        dto.setFirstName(firstName);
-        dto.setLastName(lastName);
-        dto.setMobile(mobile);
-        dto.setDob(dob);
-        return dto;
+        return MemberDto.MyAccountReq.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .mobile(mobile)
+                .dob(dob)
+                .build();
     }
-
-
 }
