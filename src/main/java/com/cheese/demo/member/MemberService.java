@@ -65,9 +65,9 @@ public class MemberService {
     }
 
     public CommonDto.ExistenceRes isExist(String email) {
-        CommonDto.ExistenceRes existence = new CommonDto.ExistenceRes();
-        existence.setExistence(isDuplicatedEmail(email));
-        return existence;
+        return CommonDto.ExistenceRes.builder()
+                .existence(isDuplicatedEmail(email))
+                .build();
     }
 
     private boolean isDuplicatedEmail(String email) {
