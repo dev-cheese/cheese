@@ -1,6 +1,5 @@
 package com.cheese.demo.member;
 
-import com.cheese.demo.commons.CommonDto;
 import com.cheese.demo.member.exception.EmailDuplicationException;
 import com.cheese.demo.member.exception.MemberNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ public class MemberService {
     public Member create(MemberDto.SignUpReq dto) {
         final String email = dto.getEmail();
 
-        if (isDuplicatedEmail(email))
+        if (isExistedEmail(email))
             throw new EmailDuplicationException(email);
 
         final String encodePassword = encodePassword(dto.getPassword());
@@ -64,13 +63,7 @@ public class MemberService {
             throw new MemberNotFoundException(email);
     }
 
-    public CommonDto.ExistenceRes isExist(String email) {
-        return CommonDto.ExistenceRes.builder()
-                .existence(isDuplicatedEmail(email))
-                .build();
-    }
-
-    private boolean isDuplicatedEmail(String email) {
+    public boolean isExistedEmail(String email) {
         return memberRepository.findByEmail(email) != null;
     }
 

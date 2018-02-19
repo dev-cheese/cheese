@@ -45,6 +45,6 @@ public class MemberController {
     @RequestMapping(value = "/exists", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
     public CommonDto.ExistenceRes isExist(@RequestParam(value = "email") String email) {
-        return memberService.isExist(email);
+        return new CommonDto.ExistenceRes(memberService.isExistedEmail(email));
     }
 }

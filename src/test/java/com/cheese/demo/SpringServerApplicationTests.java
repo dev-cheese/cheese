@@ -10,7 +10,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class SpringServerApplicationTests {
 
     @Test
-    public void contextLoads() {
+    public void applicationContextTest() {
+        SpringServerApplication.main(new String[]{});
     }
 
 }
