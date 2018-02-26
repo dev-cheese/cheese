@@ -17,3 +17,31 @@ spring:
     username: root
     password:
     driver-class-name: com.mysql.jdbc.Driver
+
+#security :
+#  user:
+#    name: user
+#    password: test
+#
+#    oauth2:
+#      client:
+#        client-id: foo
+#        client-secret: bar
+security:
+  oauth2:
+    client:
+      client-id: foo
+      client-secret: bar
+  user:
+    name: user
+    password: test
+#    role: USER
+logging:
+  level:
+    ROOT: DEBUG
+
+
+spring.h2.console:
+  enabled: true
+  path: /h2-console
+

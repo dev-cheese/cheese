@@ -31,7 +31,7 @@ public class MemberService {
             throw new EmailDuplicationException(email);
 
         final String encodePassword = encodePassword(dto.getPassword());
-        MemberRoleEnum role = MemberRoleEnum.USER;
+        MemberRoleEnum role = MemberRoleEnum.read;
 
         return memberRepository.save(dto.toEntity(encodePassword, role));
     }
