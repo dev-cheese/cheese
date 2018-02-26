@@ -249,7 +249,8 @@ public class MemberControllerTest {
 
     private ResultActions requestGetUsers() throws Exception {
         return mockMvc.perform(get("/members" + "/")
-                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
+//                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
+                .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiYWRtaW4wMDFAZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTcxNTQwMywiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiJdLCJqdGkiOiJiYzI2N2IzOS1mNjJmLTQwZDYtYWUxYi1iOWRkOGMwYTUwY2EiLCJjbGllbnRfaWQiOiJ0ZXN0and0Y2xpZW50aWQifQ.8tXDwPTyRwQet1WTFwzXRQB2VLyo9o4ZvUYHRsxLptY"))
                 .andDo(print());
     }
 
