@@ -26,7 +26,6 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,26 +48,24 @@ public class MemberControllerTest {
     private final String MOBILE = "01071333262";
     private final Date DOB = Date.valueOf(LocalDate.now());
     private final String ADMIN_EMAIL = "admin001@gmail.com";
-    private final String JWT_TOKEN_BY_ADMIN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiYWRtaW4wMDFAZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTcxNTQwMywiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiJdLCJqdGkiOiJiYzI2N2IzOS1mNjJmLTQwZDYtYWUxYi1iOWRkOGMwYTUwY2EiLCJjbGllbnRfaWQiOiJ0ZXN0and0Y2xpZW50aWQifQ.8tXDwPTyRwQet1WTFwzXRQB2VLyo9o4ZvUYHRsxLptY";
+    private final String JWT_TOKEN_BY_ADMIN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiYWRtaW4wMDFAZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTc5MTUzOSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiJdLCJqdGkiOiIwZTI0ZGU4Mi04NDA1LTQyNTgtOWI0OC04ZjY0NjRmYTVjN2UiLCJjbGllbnRfaWQiOiJ0ZXN0and0Y2xpZW50aWQifQ.P2yEnAJSkvl5D_Ghy4QQBGN8n31XDULP4tYrJ2mZopQ";
     private final String JWT_TOKEN_BY_WAN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiYWRtaW4wMDFAZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTcxNTQwMywiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiJdLCJqdGkiOiJiYzI2N2IzOS1mNjJmLTQwZDYtYWUxYi1iOWRkOGMwYTUwY2EiLCJjbGllbnRfaWQiOiJ0ZXN0and0Y2xpZW50aWQifQ.8tXDwPTyRwQet1WTFwzXRQB2VLyo9o4ZvUYHRsxLptY";
-    private final String JWT_TOKEN_BY_CHEESE = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiY2hlZXNlMTB5dW5AZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTc2NjA4MSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9VU0VSIl0sImp0aSI6IjU0M2U2ZTE4LTQyY2QtNGY5My1hY2I3LWI2ZTQ1MTMxNTczOSIsImNsaWVudF9pZCI6InRlc3Rqd3RjbGllbnRpZCJ9.jxkzCJ-76ZelP_5d9x2nvb5ggdCnKCJ5cB8061owhSE"
+    private final String JWT_TOKEN_BY_CHEESE = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiY2hlZXNlMTB5dW5AZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTc2NjA4MSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9VU0VSIl0sImp0aSI6IjU0M2U2ZTE4LTQyY2QtNGY5My1hY2I3LWI2ZTQ1MTMxNTczOSIsImNsaWVudF9pZCI6InRlc3Rqd3RjbGllbnRpZCJ9.jxkzCJ-76ZelP_5d9x2nvb5ggdCnKCJ5cB8061owhSE";
     private final String AUTHORIZATION = "Authorization";
 
     private MockMvc mockMvc;
     private MemberMock memberMock;
 
-    private final WebApplicationContext webApplicationContext;
-    private final ObjectMapper objectMapper;
-    private final FilterChainProxy springSecurityFilterChain;
-    private final MemberService memberService;
 
     @Autowired
-    public MemberControllerTest(WebApplicationContext webApplicationContext, ObjectMapper objectMapper, FilterChainProxy springSecurityFilterChain, MemberService memberService) {
-        this.webApplicationContext = webApplicationContext;
-        this.objectMapper = objectMapper;
-        this.springSecurityFilterChain = springSecurityFilterChain;
-        this.memberService = memberService;
-    }
+    private WebApplicationContext webApplicationContext;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private FilterChainProxy springSecurityFilterChain;
+    @Autowired
+    private MemberService memberService;
+
 
     @Before
     public void setUp() {
@@ -77,6 +74,7 @@ public class MemberControllerTest {
                 .addFilter(springSecurityFilterChain)
                 .build();
     }
+
 
     //    회원가입
     @Test
@@ -89,7 +87,7 @@ public class MemberControllerTest {
 
     //    이메일 중복 예외
     @Test
-    public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
+    public void When_signUpEmailDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
         MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
 
@@ -101,14 +99,14 @@ public class MemberControllerTest {
 
     //    이메일 유효성 예외
     @Test
-    public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
+    public void When_signUpEmailNotValidated_expect_INVALID_DOMAIN() throws Exception {
         MemberDto.SignUpReq email_type_validation = memberMock.setSignUpDto("not_email_validate", PASSWORD, RE_PASSWORD);
         requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
     //    비밀번호 유호성 예외
     @Test
-    public void When_passwordIsNotValidated_expect_INVALID_INPUTS() throws Exception {
+    public void When_signUpPasswordNotValidated_expect_INVALID_INPUTS() throws Exception {
         MemberDto.SignUpReq password_length_validation = memberMock.setSignUpDto(EMAIL, "123456", "123456");
         requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_INPUTS);
     }
@@ -152,7 +150,7 @@ public class MemberControllerTest {
     public void When_getUserNotExisted_expect_USER_NOT_FOUND() throws Exception {
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         RequestGetUser(0L)
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
                 .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
     }
@@ -231,8 +229,9 @@ public class MemberControllerTest {
     //권한 없는 사용자가 특정 유저 조회했을 경우
     @Test
     public void When_getUserWithUnauthorized_expect_401() throws Exception {
-        RequestGetUser(0L)
-                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/members" + "/" + 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
     }
 
     //권한 없는 사용자가 특정 유저 업데이트했을 경우
@@ -272,14 +271,14 @@ public class MemberControllerTest {
 
     private ResultActions RequestGetUser(Long id) throws Exception {
         return mockMvc.perform(get("/members" + "/" + id)
-                .with(httpBasic(EMAIL, PASSWORD))
+                .header(AUTHORIZATION, JWT_TOKEN_BY_CHEESE)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
     }
 
     private ResultActions requestMyAccount(MemberDto.MyAccountReq dto, Long id) throws Exception {
         return mockMvc.perform(put("/members" + "/" + id)
-                .with(httpBasic(EMAIL, PASSWORD))
+                .header(AUTHORIZATION, JWT_TOKEN_BY_CHEESE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print());

@@ -7,6 +7,7 @@ import com.cheese.demo.member.exception.MemberNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,13 +28,23 @@ public class ExceptionAdviceController {
 
     @ExceptionHandler(value = {
             EmailDuplicationException.class,
-            MemberNotFoundException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     protected ErrorResponse handleBadRequestException(RuntimeException ex) {
-        ErrorCodeEnum code = getErrorCodeEnum(ex.getMessage());
+        ErrorCodeEnum code = getErrorCode(ex.getMessage());
         return createErrorResponse(HttpStatus.BAD_REQUEST.value(), code.getCode(), code.getMessage(), null);
+    }
+
+
+    @ExceptionHandler(value = {
+            MemberNotFoundException.class
+    })
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    protected ErrorResponse handleNotFoundException(RuntimeException ex) {
+        ErrorCodeEnum code = getErrorCode(ex.getMessage());
+        return createErrorResponse(HttpStatus.NOT_FOUND.value(), code.getCode(), code.getMessage(), null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,7 +53,7 @@ public class ExceptionAdviceController {
     public ErrorResponse handleValidationError(MethodArgumentNotValidException ex) {
         BindingResult result = ex.getBindingResult();
         final List<FieldError> fieldErrors = result.getFieldErrors();
-        ErrorCodeEnum code = getErrorCodeEnum("INVALID_INPUTS");
+        ErrorCodeEnum code = ErrorCodeEnum.INVALID_INPUTS;
         return createErrorResponse(HttpStatus.BAD_REQUEST.value(), code.getCode(), code.getMessage(), null);
     }
 
@@ -53,13 +64,24 @@ public class ExceptionAdviceController {
         final int value = HttpStatus.BAD_REQUEST.value();
         final String code = ErrorCodeEnum.INVALID_DOMAIN.getCode();
         final String message = ErrorCodeEnum.INVALID_DOMAIN.getMessage();
+
         final List<ErrorResponse.FieldError> collect = ex.getConstraintViolations()
                 .parallelStream()
                 .map(error -> modelMapper.map(error, ErrorResponse.FieldError.class))
                 .collect(Collectors.toList());
 
+
         return createErrorResponse(value, code, message, collect);
     }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public ErrorResponse handleUnauthorizedError(AuthenticationException ex) {
+        ErrorCodeEnum code = ErrorCodeEnum.UNAUTHORIZED;
+        return createErrorResponse(HttpStatus.UNAUTHORIZED.value(), code.getCode(), code.getMessage(), null);
+    }
+
 
 
     private ErrorResponse createErrorResponse(int status, String code, String message, List<ErrorResponse.FieldError> errors) {
@@ -73,7 +95,7 @@ public class ExceptionAdviceController {
         return response;
     }
 
-    private ErrorCodeEnum getErrorCodeEnum(String code) {
+    private ErrorCodeEnum getErrorCode(String code) {
         return ErrorCodeEnum.valueOf(code);
     }
 }

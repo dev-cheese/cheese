@@ -32,10 +32,12 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
+
         http
                 .requestMatchers()
                 .and()
                 .authorizeRequests()
+                .antMatchers("/browser/**").permitAll() // browser 허용
                 .antMatchers(HttpMethod.POST, MEMBER_URL_PATH).permitAll()
                 .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/exists**").permitAll()
                 .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/{id}").hasRole(USER)

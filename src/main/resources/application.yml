@@ -21,3 +21,6 @@ security:
   oauth2:
     resource:
       filter-order: 3
+#logging:
+#  level:
+#    ROOT: DEBUG

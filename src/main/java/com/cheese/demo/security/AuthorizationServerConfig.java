@@ -21,17 +21,19 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     private final JwtAccessTokenConverter accessTokenConverter;
     private final AuthenticationManager authenticationManager;
     //    @Value("${security.jwt.client-id}")
-    private final String clientId = "testjwtclientid";
+    private final String CLIENT_ID = "testjwtclientid";
     //    @Value("${security.jwt.client-secret}")
-    private final String clientSecret = "XY7kmzoNzl100";
+    private final String CLIENT_SECRET = "XY7kmzoNzl100";
     //    @Value("${security.jwt.grant-type}")
-    private final String grantType = "password";
+    private final String GRANT_TYPE = "password";
     //    @Value("${security.jwt.scope-read}")
-    private final String scopeRead = "read";
+    private final String SCOPE_READ = "read";
     //    @Value("${security.jwt.scope-write}")
-    private final String scopeWrite = "write";
+    private final String SCOPE_WRITE = "write";
     //    @Value("${security.jwt.resource-ids}")
-    private final String resourceIds = "testjwtresourceid";
+    private final String RESOURCE_ID = "testjwtresourceid";
+
+    private final int ACCESS_TOKEN_VALIDITY_SECONDS = 1_209_600; // 14 days
 
     @Autowired
     public AuthorizationServerConfig(TokenStore tokenStore, JwtAccessTokenConverter accessTokenConverter, AuthenticationManager authenticationManager) {
@@ -44,11 +46,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
         configurer
                 .inMemory()
-                .withClient(clientId)
-                .secret(clientSecret)
-                .authorizedGrantTypes(grantType)
-                .scopes(scopeRead, scopeWrite)
-                .resourceIds(resourceIds);
+                .withClient(CLIENT_ID)
+                .secret(CLIENT_SECRET)
+                .authorizedGrantTypes(GRANT_TYPE)
+                .scopes(SCOPE_READ, SCOPE_WRITE)
+                .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
+                .resourceIds(RESOURCE_ID);
     }
 
     @Override
