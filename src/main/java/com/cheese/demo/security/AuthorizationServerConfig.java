@@ -21,17 +21,17 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     private final JwtAccessTokenConverter accessTokenConverter;
     private final AuthenticationManager authenticationManager;
     //    @Value("${security.jwt.client-id}")
-    private String clientId = "testjwtclientid";
+    private final String clientId = "testjwtclientid";
     //    @Value("${security.jwt.client-secret}")
-    private String clientSecret = "XY7kmzoNzl100";
+    private final String clientSecret = "XY7kmzoNzl100";
     //    @Value("${security.jwt.grant-type}")
-    private String grantType = "password";
+    private final String grantType = "password";
     //    @Value("${security.jwt.scope-read}")
-    private String scopeRead = "read";
+    private final String scopeRead = "read";
     //    @Value("${security.jwt.scope-write}")
-    private String scopeWrite = "write";
+    private final String scopeWrite = "write";
     //    @Value("${security.jwt.resource-ids}")
-    private String resourceIds = "testjwtresourceid";
+    private final String resourceIds = "testjwtresourceid";
 
     @Autowired
     public AuthorizationServerConfig(TokenStore tokenStore, JwtAccessTokenConverter accessTokenConverter, AuthenticationManager authenticationManager) {

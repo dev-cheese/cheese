@@ -39,11 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class MemberControllerTest {
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private final String PASSWORD = "password001";
     private final String RE_PASSWORD = "password001";
@@ -54,14 +49,26 @@ public class MemberControllerTest {
     private final String MOBILE = "01071333262";
     private final Date DOB = Date.valueOf(LocalDate.now());
     private final String ADMIN_EMAIL = "admin001@gmail.com";
-    @Autowired
-    private FilterChainProxy springSecurityFilterChain;
-    @Autowired
-    private MemberService memberService;
-    @Autowired
-    private MemberRepository memberRepository;
+    private final String JWT_TOKEN_BY_ADMIN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiYWRtaW4wMDFAZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTcxNTQwMywiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiJdLCJqdGkiOiJiYzI2N2IzOS1mNjJmLTQwZDYtYWUxYi1iOWRkOGMwYTUwY2EiLCJjbGllbnRfaWQiOiJ0ZXN0and0Y2xpZW50aWQifQ.8tXDwPTyRwQet1WTFwzXRQB2VLyo9o4ZvUYHRsxLptY";
+    private final String JWT_TOKEN_BY_WAN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiYWRtaW4wMDFAZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTcxNTQwMywiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiJdLCJqdGkiOiJiYzI2N2IzOS1mNjJmLTQwZDYtYWUxYi1iOWRkOGMwYTUwY2EiLCJjbGllbnRfaWQiOiJ0ZXN0and0Y2xpZW50aWQifQ.8tXDwPTyRwQet1WTFwzXRQB2VLyo9o4ZvUYHRsxLptY";
+    private final String JWT_TOKEN_BY_CHEESE = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiY2hlZXNlMTB5dW5AZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTc2NjA4MSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9VU0VSIl0sImp0aSI6IjU0M2U2ZTE4LTQyY2QtNGY5My1hY2I3LWI2ZTQ1MTMxNTczOSIsImNsaWVudF9pZCI6InRlc3Rqd3RjbGllbnRpZCJ9.jxkzCJ-76ZelP_5d9x2nvb5ggdCnKCJ5cB8061owhSE"
+    private final String AUTHORIZATION = "Authorization";
+
     private MockMvc mockMvc;
     private MemberMock memberMock;
+
+    private final WebApplicationContext webApplicationContext;
+    private final ObjectMapper objectMapper;
+    private final FilterChainProxy springSecurityFilterChain;
+    private final MemberService memberService;
+
+    @Autowired
+    public MemberControllerTest(WebApplicationContext webApplicationContext, ObjectMapper objectMapper, FilterChainProxy springSecurityFilterChain, MemberService memberService) {
+        this.webApplicationContext = webApplicationContext;
+        this.objectMapper = objectMapper;
+        this.springSecurityFilterChain = springSecurityFilterChain;
+        this.memberService = memberService;
+    }
 
     @Before
     public void setUp() {
@@ -249,14 +256,13 @@ public class MemberControllerTest {
 
     private ResultActions requestGetUsers() throws Exception {
         return mockMvc.perform(get("/members" + "/")
-//                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
-                .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidGVzdGp3dHJlc291cmNlaWQiXSwidXNlcl9uYW1lIjoiYWRtaW4wMDFAZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTUxOTcxNTQwMywiYXV0aG9yaXRpZXMiOlsiUk9MRV9BRE1JTiJdLCJqdGkiOiJiYzI2N2IzOS1mNjJmLTQwZDYtYWUxYi1iOWRkOGMwYTUwY2EiLCJjbGllbnRfaWQiOiJ0ZXN0and0Y2xpZW50aWQifQ.8tXDwPTyRwQet1WTFwzXRQB2VLyo9o4ZvUYHRsxLptY"))
+                .header(AUTHORIZATION, JWT_TOKEN_BY_ADMIN))
                 .andDo(print());
     }
 
     private ResultActions requestGetUsersInPage(int page, int size) throws Exception {
         return mockMvc.perform(get(getUrlPageTemplate(page, size))
-                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
+                .header(AUTHORIZATION, JWT_TOKEN_BY_ADMIN))
                 .andDo(print());
     }
 
