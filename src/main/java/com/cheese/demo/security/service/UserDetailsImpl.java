@@ -1,4 +1,4 @@
-package com.cheese.demo.security;
+package com.cheese.demo.security.service;
 
 import com.cheese.demo.member.Member;
 import org.springframework.security.core.GrantedAuthority;

@@ -27,13 +27,22 @@ public class ExceptionAdviceController {
 
     @ExceptionHandler(value = {
             EmailDuplicationException.class,
-            MemberNotFoundException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     protected ErrorResponse handleBadRequestException(RuntimeException ex) {
         ErrorCodeEnum code = getErrorCodeEnum(ex.getMessage());
         return createErrorResponse(HttpStatus.BAD_REQUEST.value(), code.getCode(), code.getMessage(), null);
+    }
+
+    @ExceptionHandler(value = {
+            MemberNotFoundException.class
+    })
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    protected ErrorResponse handleNotFoundException(RuntimeException ex) {
+        ErrorCodeEnum code = getErrorCodeEnum(ex.getMessage());
+        return createErrorResponse(HttpStatus.NOT_FOUND.value(), code.getCode(), code.getMessage(), null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -63,7 +72,6 @@ public class ExceptionAdviceController {
 
 
     private ErrorResponse createErrorResponse(int status, String code, String message, List<ErrorResponse.FieldError> errors) {
-
         ErrorResponse response = new ErrorResponse();
         response.setStatus(status);
         response.setCode(code);
