@@ -66,22 +66,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 //.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // allow anonymous resource requests
-//                .antMatchers(
-//                        HttpMethod.GET,
-//                        "/",
-//                        "/*.html",
-//                        "/favicon.ico",
-//                        "/**/*.html",
-//                        "/**/*.css",
-//                        "/**/*.js"
-//                ).permitAll()
-
-                // Un-secure H2 Database
-                .antMatchers("/h2-console/**/**").permitAll()
+                // browser
+                .antMatchers("/browser/**").permitAll()
 
                 .antMatchers("/auth/**").permitAll()
-                .antMatchers("/members/**").permitAll()
                 .antMatchers(HttpMethod.POST, MEMBER_URL_PATH).permitAll()
                 .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/exists**").permitAll()
                 .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/{id}").authenticated()

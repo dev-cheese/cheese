@@ -125,12 +125,13 @@ public class JwtTokenUtil implements Serializable {
     private String doGenerateToken(Map<String, Object> claims, String audience) {
         final Date createdDate = clock.now();
         final Date expirationDate = calculateExpirationDate(createdDate);
+        final String email = (String) claims.get("email");
 
         System.out.println("doGenerateToken " + createdDate);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject("test")
+                .setSubject(email)
                 .setAudience(audience)
                 .setIssuedAt(createdDate)
                 .setExpiration(expirationDate)
