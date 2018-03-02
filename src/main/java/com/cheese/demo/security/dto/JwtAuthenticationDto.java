@@ -24,7 +24,6 @@ public class JwtAuthenticationDto implements Serializable {
     }
 
     @Getter
-    @NoArgsConstructor
     public static class Response {
         private String token;
 

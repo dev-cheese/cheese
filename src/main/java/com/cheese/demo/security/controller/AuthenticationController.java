@@ -13,12 +13,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class AuthenticationController {
@@ -32,8 +32,8 @@ public class AuthenticationController {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+//    @Autowired
+//    private UserDetailsService userDetailsService;
 
     @Autowired
     private MemberService memberService;
@@ -52,7 +52,7 @@ public class AuthenticationController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Reload password post-security so we can generate token
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(dto.getEmail());
+//        final UserDetails userDetails = userDetailsService.loadUserByUsername(dto.getEmail());
 
         final Member member = memberService.findByEmail(dto.getEmail());
         final String token = jwtTokenUtil.generateToken(member, device);
@@ -61,5 +61,19 @@ public class AuthenticationController {
         return ResponseEntity.ok(new JwtAuthenticationDto.Response(token));
     }
 
+    @RequestMapping(value = "${jwt.route.authentication.refresh}", method = RequestMethod.GET)
+    public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request) {
+        String authToken = request.getHeader(tokenHeader);
+        final String token = authToken.substring(7);
+        String email = jwtTokenUtil.getUsernameFromToken(token);
+        Member member = memberService.findByEmail(email);
+
+        if (jwtTokenUtil.canTokenBeRefreshed(token, member.getCreatedDt())) {
+            String refreshedToken = jwtTokenUtil.refreshToken(token);
+            return ResponseEntity.ok(new JwtAuthenticationDto.Response(refreshedToken));
+        } else {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 
 }

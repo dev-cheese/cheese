@@ -2,6 +2,7 @@ package com.cheese.demo.member;
 
 import com.cheese.demo.SpringServerApplication;
 import com.cheese.demo.commons.ErrorCodeEnum;
+import com.cheese.demo.mock.DeviceDummy;
 import com.cheese.demo.mock.MemberMock;
 import com.cheese.demo.security.JwtTokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,8 +13,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mobile.device.Device;
-import org.springframework.mobile.device.DevicePlatform;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -77,7 +76,7 @@ public class MemberControllerTest {
     }
 
     @Test
-    public void When_signUp_expect_succeed() throws Exception {
+    public void When_SignUpValidMember_Expect_ReturnMember() throws Exception {
         MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         requestSignUp(dto)
                 .andExpect(status().isCreated())
@@ -85,7 +84,7 @@ public class MemberControllerTest {
     }
 
     @Test
-    public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
+    public void When_SignUpEmailIsDuplicated_Expect_EmailDuplicationException() throws Exception {
         MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
 
@@ -96,19 +95,20 @@ public class MemberControllerTest {
     }
 
     @Test
-    public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
+    public void When_SignUpEmailIsInValid_Expect_ConstraintViolationException() throws Exception {
         MemberDto.SignUpReq email_type_validation = memberMock.setSignUpDto("not_email_validate", PASSWORD, RE_PASSWORD);
         requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
     @Test
-    public void When_passwordIsNotValidated_expect_INVALID_INPUTS() throws Exception {
+    public void When_SignUpPasswordIsOnlyString_Expect_MethodArgumentNotValidException() throws Exception {
+        //password is must to include number
         MemberDto.SignUpReq password_length_validation = memberMock.setSignUpDto(EMAIL, "123456", "123456");
         requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_INPUTS);
     }
 
     @Test
-    public void When_myAccountUpdate_expect_succeed() throws Exception {
+    public void When_MyAccountUpdateValid_Expect_returnMember() throws Exception {
         Member member = createUser();
         MemberDto.MyAccountReq dto = CreateMyAccountReq();
         String token = generateToken(member);
@@ -122,7 +122,7 @@ public class MemberControllerTest {
     }
 
     @Test
-    public void When_notExistedUser_expect_USER_NOT_FOUND() throws Exception {
+    public void When_MyAccountUpdateNotExistedMember_Expect_MemberNotFoundException() throws Exception {
         Member member = createUser();
         MemberDto.MyAccountReq dto = CreateMyAccountReq();
         String token = generateToken(member);
@@ -145,7 +145,7 @@ public class MemberControllerTest {
     }
 
     @Test
-    public void When_getUser_expect_succeed() throws Exception {
+    public void When_getMember_expect_succeed() throws Exception {
         Member member = createUser();
         String token = generateToken(member);
         RequestGetUser(member.getId(), token)
@@ -153,7 +153,7 @@ public class MemberControllerTest {
     }
 
     @Test
-    public void When_getUserNotExisted_expect_USER_NOT_FOUND() throws Exception {
+    public void When_getMemberIfNotExisted_Expect_MemberNotFoundException() throws Exception {
         Member member = memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         String token = generateToken(member);
 
@@ -164,7 +164,7 @@ public class MemberControllerTest {
     }
 
     @Test
-    public void When_getUsers_expect_succeed() throws Exception {
+    public void When_getMembers_Expect_ReturnMembers() throws Exception {
         eachCreateUser(20);
         String token = generateToken(memberService.findByEmail(ADMIN_EMAIL));
         requestGetUsers(token)
@@ -253,7 +253,6 @@ public class MemberControllerTest {
 
     private ResultActions requestGetUsers(String token) throws Exception {
         return mockMvc.perform(get("/members" + "/")
-//                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
                 .header("Authorization", "Bearer " + token))
                 .andDo(print());
     }
@@ -261,7 +260,6 @@ public class MemberControllerTest {
     private ResultActions requestGetUsersInPage(int page, int size, String token) throws Exception {
         return mockMvc.perform(get(getUrlPageTemplate(page, size))
                 .header("Authorization", "Bearer " + token))
-//                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
                 .andDo(print());
     }
 
@@ -271,7 +269,6 @@ public class MemberControllerTest {
 
     private ResultActions RequestGetUser(Long id, String token) throws Exception {
         return mockMvc.perform(get("/members" + "/" + id)
-//                .with(httpBasic(EMAIL, PASSWORD))
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
@@ -279,7 +276,6 @@ public class MemberControllerTest {
 
     private ResultActions requestMyAccount(MemberDto.MyAccountReq dto, Long id, String token) throws Exception {
         return mockMvc.perform(put("/members" + "/" + id)
-//                .with(httpBasic(EMAIL, PASSWORD))
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
@@ -306,36 +302,15 @@ public class MemberControllerTest {
                 memberService.create(memberMock.setSignUpDto(i + EMAIL, PASSWORD, RE_PASSWORD)));
     }
 
-    private Device getDevice() {
-        return new Device() {
-            @Override
-            public boolean isNormal() {
-                return true;
-            }
-
-            @Override
-            public boolean isMobile() {
-                return false;
-            }
-
-            @Override
-            public boolean isTablet() {
-                return false;
-            }
-
-            @Override
-            public DevicePlatform getDevicePlatform() {
-                return null;
-            }
-        };
-    }
 
     private Member createUser() {
         return memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
     }
 
     private String generateToken(Member member) {
-        return jwtTokenUtil.generateToken(member, getDevice());
+        final DeviceDummy device = new DeviceDummy();
+        device.setNormal(true);
+        return jwtTokenUtil.generateToken(member, device);
     }
 
     private MemberDto.MyAccountReq CreateMyAccountReq() {
