@@ -3,16 +3,27 @@ package com.cheese.demo.security;
 import com.cheese.demo.member.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class UserDetailsImpl extends User {
+public class JwtUserFactory {
 
-    public UserDetailsImpl(Member member) {
-        super(member.getEmail(), member.getPassword(), authorities(member));
+    public static JwtUser buildJwtUser(Member member) {
+
+        return JwtUser.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .firstName(member.getFirstName())
+                .lastName(member.getLastName())
+                .password(member.getPassword())
+                .username(member.getEmail())
+                .lastPasswordResetDate(member.getCreatedDt())
+                .enabled(true)
+                .authorities(authorities(member))
+                .build();
+
     }
 
     private static Collection<? extends GrantedAuthority> authorities(final Member member) {

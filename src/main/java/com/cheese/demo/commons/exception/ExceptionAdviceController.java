@@ -4,23 +4,21 @@ import com.cheese.demo.commons.ErrorCodeEnum;
 import com.cheese.demo.commons.ErrorResponse;
 import com.cheese.demo.member.exception.EmailDuplicationException;
 import com.cheese.demo.member.exception.MemberNotFoundException;
+import com.cheese.demo.security.exception.JwtTokenMalformedException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class ExceptionAdviceController {
 
     @Autowired
@@ -32,10 +30,9 @@ public class ExceptionAdviceController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     protected ErrorResponse handleBadRequestException(RuntimeException ex) {
-        ErrorCodeEnum code = getErrorCode(ex.getMessage());
+        ErrorCodeEnum code = getErrorCodeEnum(ex.getMessage());
         return createErrorResponse(HttpStatus.BAD_REQUEST.value(), code.getCode(), code.getMessage(), null);
     }
-
 
     @ExceptionHandler(value = {
             MemberNotFoundException.class
@@ -43,17 +40,25 @@ public class ExceptionAdviceController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     protected ErrorResponse handleNotFoundException(RuntimeException ex) {
-        ErrorCodeEnum code = getErrorCode(ex.getMessage());
+        ErrorCodeEnum code = getErrorCodeEnum(ex.getMessage());
         return createErrorResponse(HttpStatus.NOT_FOUND.value(), code.getCode(), code.getMessage(), null);
+    }
+
+    @ExceptionHandler(value = {
+            JwtTokenMalformedException.class
+    })
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    protected ErrorResponse handleTest(JwtTokenMalformedException ex) {
+        ErrorCodeEnum code = getErrorCodeEnum(ex.getMessage());
+        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), code.getCode(), code.getMessage(), null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorResponse handleValidationError(MethodArgumentNotValidException ex) {
-        BindingResult result = ex.getBindingResult();
-        final List<FieldError> fieldErrors = result.getFieldErrors();
-        ErrorCodeEnum code = ErrorCodeEnum.INVALID_INPUTS;
+        ErrorCodeEnum code = getErrorCodeEnum("INVALID_INPUTS");
         return createErrorResponse(HttpStatus.BAD_REQUEST.value(), code.getCode(), code.getMessage(), null);
     }
 
@@ -61,41 +66,28 @@ public class ExceptionAdviceController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorResponse handleConstraintViolationException(ConstraintViolationException ex) {
-        final int value = HttpStatus.BAD_REQUEST.value();
+        final int status = HttpStatus.BAD_REQUEST.value();
         final String code = ErrorCodeEnum.INVALID_DOMAIN.getCode();
         final String message = ErrorCodeEnum.INVALID_DOMAIN.getMessage();
-
         final List<ErrorResponse.FieldError> collect = ex.getConstraintViolations()
                 .parallelStream()
                 .map(error -> modelMapper.map(error, ErrorResponse.FieldError.class))
                 .collect(Collectors.toList());
 
-
-        return createErrorResponse(value, code, message, collect);
+        return createErrorResponse(status, code, message, collect);
     }
-
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ResponseBody
-    public ErrorResponse handleUnauthorizedError(AuthenticationException ex) {
-        ErrorCodeEnum code = ErrorCodeEnum.UNAUTHORIZED;
-        return createErrorResponse(HttpStatus.UNAUTHORIZED.value(), code.getCode(), code.getMessage(), null);
-    }
-
 
 
     private ErrorResponse createErrorResponse(int status, String code, String message, List<ErrorResponse.FieldError> errors) {
-
-        ErrorResponse response = new ErrorResponse();
-        response.setStatus(status);
-        response.setCode(code);
-        response.setMessage(message);
-        response.setErrors(errors);
-
-        return response;
+        return ErrorResponse.builder()
+                .status(status)
+                .code(code)
+                .message(message)
+                .errors(errors)
+                .build();
     }
 
-    private ErrorCodeEnum getErrorCode(String code) {
+    private ErrorCodeEnum getErrorCodeEnum(String code) {
         return ErrorCodeEnum.valueOf(code);
     }
 }
