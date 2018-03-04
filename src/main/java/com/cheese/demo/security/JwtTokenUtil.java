@@ -1,6 +1,5 @@
 package com.cheese.demo.security;
 
-import com.cheese.demo.member.Member;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Clock;
@@ -39,8 +38,8 @@ public class JwtTokenUtil implements Serializable {
     private Long expiration;
 
 
-    public String generateToken(Member member, Device device) {
-        Map<String, Object> claims = setClaims(member);
+    public String generateToken(UserDetails userDetails, Device device) {
+        Map<String, Object> claims = setClaims(userDetails);
         return doGenerateToken(claims, generateAudience(device));
     }
 
@@ -59,14 +58,14 @@ public class JwtTokenUtil implements Serializable {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        JwtUser user = (JwtUser) userDetails;
+        JwtUser jwtUser = (JwtUser) userDetails;
         final String username = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
-        //final Date expiration = getExpirationDateFromToken(token);
+//        final Date expiration = getExpirationDateFromToken(token);
         return (
-                username.equals(user.getUsername())
+                username.equals(jwtUser.getUsername())
                         && !isTokenExpired(token)
-                        && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())
+                        && !isCreatedBeforeLastPasswordReset(created, jwtUser.getLastPasswordResetDate())
         );
     }
 
@@ -148,12 +147,14 @@ public class JwtTokenUtil implements Serializable {
         return (AUDIENCE_TABLET.equals(audience) || AUDIENCE_MOBILE.equals(audience));
     }
 
-    private Map<String, Object> setClaims(Member member) {
+    private Map<String, Object> setClaims(UserDetails userDetails) {
+        JwtUser jwtUser = (JwtUser) userDetails;
+
         Map<String, Object> claims = new HashMap<>();
-        claims.put("email", member.getEmail());
-        claims.put("firstName", member.getFirstName());
-        claims.put("lastName", member.getLastName());
-        claims.put("authorities", member.getRole());
+        claims.put("email", jwtUser.getEmail());
+        claims.put("firstName", jwtUser.getFirstName());
+        claims.put("lastName", jwtUser.getLastName());
+        claims.put("authorities", jwtUser.getAuthorities());
         return claims;
     }
 

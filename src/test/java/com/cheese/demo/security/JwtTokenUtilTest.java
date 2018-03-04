@@ -151,7 +151,9 @@ public class JwtTokenUtilTest {
                 .role(MemberRoleEnum.ADMIN)
                 .build();
 
-        return jwtTokenUtil.generateToken(member, device);
+        final JwtUser jwtUser = JwtUserFactory.buildJwtUser(member);
+
+        return jwtTokenUtil.generateToken(jwtUser, device);
     }
 
 }

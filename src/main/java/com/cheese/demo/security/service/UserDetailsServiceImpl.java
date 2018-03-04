@@ -18,7 +18,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(final String email) throws UsernameNotFoundException {
         final Member member = memberService.findByEmail(email);
-        return JwtUserFactory.create(member);
-//        return new UserDetailsImpl(member);
+        return JwtUserFactory.buildJwtUser(member);
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class JwtUserFactory {
 
-    public static JwtUser create(Member member) {
+    public static JwtUser buildJwtUser(Member member) {
 
         return JwtUser.builder()
                 .id(member.getId())

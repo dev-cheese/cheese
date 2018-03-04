@@ -5,9 +5,10 @@ import com.cheese.demo.commons.ErrorCodeEnum;
 import com.cheese.demo.mock.DeviceDummy;
 import com.cheese.demo.mock.MemberMock;
 import com.cheese.demo.security.JwtTokenUtil;
+import com.cheese.demo.security.JwtUser;
+import com.cheese.demo.security.JwtUserFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,23 +130,25 @@ public class MemberControllerTest {
 
         requestMyAccount(dto, 0L, token)
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getCode())))
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getMessage())));
     }
 
     // TODO: 2018. 3. 2. 비정상 토큰시 401에러를 못돌려주고 있음 리팩토리할것
-    @Ignore
+//    @Ignore
     @Test
-    public void When_updateUserWithUnauthorized_expect_401() throws Exception {
+    public void When_updateUserWithUnauthorized_Expect_JwtTokenMalformedException() throws Exception {
         Member member = createUser();
         MemberDto.MyAccountReq dto = CreateMyAccountReq();
 
-        requestMyAccount(dto, member.getId(), "1111")
-                .andExpect(status().isUnauthorized());
+        requestMyAccount(dto, member.getId(), "inValidToken")
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
     }
 
     @Test
-    public void When_getMember_expect_succeed() throws Exception {
+    public void When_getMember_Expect_succeed() throws Exception {
         Member member = createUser();
         String token = generateToken(member);
         RequestGetUser(member.getId(), token)
@@ -159,8 +162,8 @@ public class MemberControllerTest {
 
         RequestGetUser(0L, token)
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getCode())))
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getMessage())));
     }
 
     @Test
@@ -231,12 +234,13 @@ public class MemberControllerTest {
     }
 
 
-    // TODO: 2018. 3. 2. 비정상 토큰시 401에러를 못돌려주고 있음 리팩토리할것
-    @Ignore
     @Test
     public void When_getUserWithUnauthorized_expect_401() throws Exception {
-        RequestGetUser(0L, "111")
-                .andExpect(status().isUnauthorized());
+        RequestGetUser(0L, "inValidToken")
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
     }
 
 
@@ -310,8 +314,11 @@ public class MemberControllerTest {
     private String generateToken(Member member) {
         final DeviceDummy device = new DeviceDummy();
         device.setNormal(true);
-        return jwtTokenUtil.generateToken(member, device);
+
+        final JwtUser jwtUser = JwtUserFactory.buildJwtUser(member);
+        return jwtTokenUtil.generateToken(jwtUser, device);
     }
+
 
     private MemberDto.MyAccountReq CreateMyAccountReq() {
         return memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);

@@ -1,14 +1,16 @@
 package com.cheese.demo.security.controller;
 
 import com.cheese.demo.SpringServerApplication;
+import com.cheese.demo.commons.ErrorCodeEnum;
 import com.cheese.demo.member.Member;
 import com.cheese.demo.member.MemberService;
 import com.cheese.demo.mock.DeviceDummy;
 import com.cheese.demo.security.JwtTokenUtil;
+import com.cheese.demo.security.JwtUser;
+import com.cheese.demo.security.JwtUserFactory;
 import com.cheese.demo.security.dto.JwtAuthenticationDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,6 @@ public class AuthenticationControllerTest {
 
     private MockMvc mockMvc;
 
-
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders
@@ -75,11 +76,8 @@ public class AuthenticationControllerTest {
 
     @Test
     @WithAnonymousUser
-    //인증이 유효하지 않을 경우 경우 401
-    // TODO: 2018. 3. 2. advice controller로 예외 처리하고 테스트 코드 추가할것 -yun
     public void When_authenticationIsNotValid_Expect_401() throws Exception {
         JwtAuthenticationDto.Request dto = buildDto("wan@gmail.com", "notMatchedPassword");
-
         requestAuth(dto)
                 .andExpect(status().isUnauthorized());
     }
@@ -94,15 +92,13 @@ public class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.token", is(notNullValue())));
     }
 
-    // TODO: 2018. 3. 3. 유효 하지 않은 토큰일 경우 예외 처리 추가 할것 -yun
-    @Ignore
     @Test
     public void When_getRefreshTokenIfInValidTokenWithUserRole_Except_returnRefreshToken() throws Exception {
-        Member member = memberService.findByEmail("wan@gmail.com");
-        String token = generateToken(member);
-
-        requestRefresh(token)
-                .andExpect(status().isUnauthorized());
+        requestRefresh("inValidToken")
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
     }
 
     @Test
@@ -115,16 +111,13 @@ public class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.token", is(notNullValue())));
     }
 
-    // TODO: 2018. 3. 3. 유효 하지 않은 토큰일 경우 예외 처리 추가 할것 -yun
-    @Ignore
     @Test
     public void When_getRefreshTokenIfInValidTokenWithAdminRole_Except_returnRefreshToken() throws Exception {
-        Member member = memberService.findByEmail("admin001@gmail.com");
-        String token = generateToken(member);
-
-        requestRefresh(token)
-                .andExpect(status().isUnauthorized());
-
+        requestRefresh("inValidToken")
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
     }
 
     private JwtAuthenticationDto.Request buildDto(String email, String password) {
@@ -152,6 +145,8 @@ public class AuthenticationControllerTest {
     private String generateToken(Member member) {
         final DeviceDummy device = new DeviceDummy();
         device.setNormal(true);
-        return jwtTokenUtil.generateToken(member, device);
+        final JwtUser jwtUser = JwtUserFactory.buildJwtUser(member);
+
+        return jwtTokenUtil.generateToken(jwtUser, device);
     }
 }

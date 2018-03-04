@@ -4,6 +4,7 @@ import com.cheese.demo.member.Member;
 import com.cheese.demo.member.MemberService;
 import com.cheese.demo.security.JwtTokenUtil;
 import com.cheese.demo.security.dto.JwtAuthenticationDto;
+import com.cheese.demo.security.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,10 +32,10 @@ public class AuthenticationController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    private UserDetailsServiceImpl userDetailsService;
 
-//    @Autowired
-//    private UserDetailsService userDetailsService;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     private MemberService memberService;
@@ -52,10 +54,8 @@ public class AuthenticationController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Reload password post-security so we can generate token
-//        final UserDetails userDetails = userDetailsService.loadUserByUsername(dto.getEmail());
-
-        final Member member = memberService.findByEmail(dto.getEmail());
-        final String token = jwtTokenUtil.generateToken(member, device);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(dto.getEmail());
+        final String token = jwtTokenUtil.generateToken(userDetails, device);
 
         // Return the token
         return ResponseEntity.ok(new JwtAuthenticationDto.Response(token));

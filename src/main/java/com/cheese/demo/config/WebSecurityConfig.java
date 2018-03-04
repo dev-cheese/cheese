@@ -60,7 +60,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
 
-                // don't create session
+                // don't buildJwtUser session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 
                 .authorizeRequests()
