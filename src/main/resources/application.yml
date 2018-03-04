@@ -17,3 +17,12 @@ spring:
     username: root
     password:
     driver-class-name: com.mysql.jdbc.Driver
+
+jwt:
+  header: Authorization
+  secret: mySecret
+  expiration: 604800
+  route:
+    authentication:
+      path: auth
+      refresh: refresh

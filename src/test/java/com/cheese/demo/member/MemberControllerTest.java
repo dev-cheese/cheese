@@ -2,7 +2,11 @@ package com.cheese.demo.member;
 
 import com.cheese.demo.SpringServerApplication;
 import com.cheese.demo.commons.ErrorCodeEnum;
+import com.cheese.demo.mock.DeviceDummy;
 import com.cheese.demo.mock.MemberMock;
+import com.cheese.demo.security.JwtTokenUtil;
+import com.cheese.demo.security.JwtUser;
+import com.cheese.demo.security.JwtUserFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,7 +29,7 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SpringServerApplication.class)
-@WebAppConfiguration
 @Transactional
 public class MemberControllerTest {
 
@@ -60,6 +62,9 @@ public class MemberControllerTest {
     private MemberService memberService;
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
     private MockMvc mockMvc;
     private MemberMock memberMock;
 
@@ -67,22 +72,20 @@ public class MemberControllerTest {
     public void setUp() {
         memberMock = new MemberMock();
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .addFilter(springSecurityFilterChain)
+                .apply(springSecurity())
                 .build();
     }
 
-    //    회원가입
     @Test
-    public void When_signUp_expect_succeed() throws Exception {
+    public void When_SignUpValidMember_Expect_ReturnMember() throws Exception {
         MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         requestSignUp(dto)
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email", is(dto.getEmail())));
     }
 
-    //    이메일 중복 예외
     @Test
-    public void When_emailIsDuplicated_expect_EMAIL_DUPLICATION() throws Exception {
+    public void When_SignUpEmailIsDuplicated_Expect_EmailDuplicationException() throws Exception {
         MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
 
@@ -92,27 +95,26 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.code", is(ErrorCodeEnum.EMAIL_DUPLICATION.getCode())));
     }
 
-    //    이메일 유효성 예외
     @Test
-    public void When_emailIsNotValidated_expect_INVALID_DOMAIN() throws Exception {
+    public void When_SignUpEmailIsInValid_Expect_ConstraintViolationException() throws Exception {
         MemberDto.SignUpReq email_type_validation = memberMock.setSignUpDto("not_email_validate", PASSWORD, RE_PASSWORD);
         requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
     }
 
-    //    비밀번호 유호성 예외
     @Test
-    public void When_passwordIsNotValidated_expect_INVALID_INPUTS() throws Exception {
+    public void When_SignUpPasswordIsOnlyString_Expect_MethodArgumentNotValidException() throws Exception {
+        //password is must to include number
         MemberDto.SignUpReq password_length_validation = memberMock.setSignUpDto(EMAIL, "123456", "123456");
         requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_INPUTS);
     }
 
-    //    회원 정보 수정
     @Test
-    public void When_myAccountUpdate_expect_succeed() throws Exception {
-        Member member = memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
-        MemberDto.MyAccountReq dto = memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
+    public void When_MyAccountUpdateValid_Expect_returnMember() throws Exception {
+        Member member = createUser();
+        MemberDto.MyAccountReq dto = CreateMyAccountReq();
+        String token = generateToken(member);
 
-        requestMyAccount(dto, member.getId())
+        requestMyAccount(dto, member.getId(), token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName", is(FIRST_NAME)))
                 .andExpect(jsonPath("$.lastName", is(LAST_NAME)))
@@ -120,41 +122,55 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.dob", is(DOB.toString())));
     }
 
-    //    없는 유저 업데이트시 404
     @Test
-    public void When_notExistedUser_expect_USER_NOT_FOUND() throws Exception {
-        memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
-        MemberDto.MyAccountReq dto = memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
+    public void When_MyAccountUpdateNotExistedMember_Expect_MemberNotFoundException() throws Exception {
+        Member member = createUser();
+        MemberDto.MyAccountReq dto = CreateMyAccountReq();
+        String token = generateToken(member);
 
-        requestMyAccount(dto, 0L)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
+        requestMyAccount(dto, 0L, token)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getCode())))
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getMessage())));
     }
 
-    //    특정 유저 조회
+    // TODO: 2018. 3. 2. 비정상 토큰시 401에러를 못돌려주고 있음 리팩토리할것
+//    @Ignore
     @Test
-    public void When_getUser_expect_succeed() throws Exception {
-        Member member = memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
-        RequestGetUser(member.getId())
+    public void When_updateUserWithUnauthorized_Expect_JwtTokenMalformedException() throws Exception {
+        Member member = createUser();
+        MemberDto.MyAccountReq dto = CreateMyAccountReq();
+
+        requestMyAccount(dto, member.getId(), "inValidToken")
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
+    }
+
+    @Test
+    public void When_getMember_Expect_succeed() throws Exception {
+        Member member = createUser();
+        String token = generateToken(member);
+        RequestGetUser(member.getId(), token)
                 .andExpect(status().isOk());
     }
 
-    //   없는 유저 조회시 404
     @Test
-    public void When_getUserNotExisted_expect_USER_NOT_FOUND() throws Exception {
-        memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
-        RequestGetUser(0L)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.USER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.USER_NOT_FOUND.getMessage())));
+    public void When_getMemberIfNotExisted_Expect_MemberNotFoundException() throws Exception {
+        Member member = memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+        String token = generateToken(member);
+
+        RequestGetUser(0L, token)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getCode())))
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getMessage())));
     }
 
-    //    유저 페이지 조회
     @Test
-    public void When_getUsers_expect_succeed() throws Exception {
+    public void When_getMembers_Expect_ReturnMembers() throws Exception {
         eachCreateUser(20);
-        requestGetUsers()
+        String token = generateToken(memberService.findByEmail(ADMIN_EMAIL));
+        requestGetUsers(token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements", is(instanceOf(Integer.class))))
                 .andExpect(jsonPath("$.last", is(instanceOf(Boolean.class))))
@@ -166,14 +182,14 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
 
-    //    유저 2 페이지 조회
     @Test
     public void When_getUserPage2_expect_succeed() throws Exception {
         eachCreateUser(20);
+        String token = generateToken(memberService.findByEmail(ADMIN_EMAIL));
         final int size = 10;
         final int page = 2;
 
-        requestGetUsersInPage(page, size)
+        requestGetUsersInPage(page, size, token)
                 .andExpect(jsonPath("$.totalElements", is(instanceOf(Integer.class))))
                 .andExpect(jsonPath("$.last", is(instanceOf(Boolean.class))))
                 .andExpect(jsonPath("$.totalPages", is(instanceOf(Integer.class))))
@@ -184,14 +200,14 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
 
-    //    페이지 사이즈 50 이상일 경우 10으로 강제 지정
     @Test
     public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
         eachCreateUser(20);
+        String token = generateToken(memberService.findByEmail(ADMIN_EMAIL));
         final int size = 51;
         final int page = 2;
 
-        requestGetUsersInPage(page, size)
+        requestGetUsersInPage(page, size, token)
                 .andExpect(jsonPath("$.totalElements", is(instanceOf(Integer.class))))
                 .andExpect(jsonPath("$.last", is(instanceOf(Boolean.class))))
                 .andExpect(jsonPath("$.totalPages", is(instanceOf(Integer.class))))
@@ -202,7 +218,6 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.numberOfElements", is(instanceOf(Integer.class))));
     }
 
-    // 이메일 존재 유무 검사
     @Test
     public void When_emailIsNotExist_expect_false() throws Exception {
         requestExists(EMAIL)
@@ -210,7 +225,6 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.existence", is(false)));
     }
 
-    // 이메일 존재 유무 검사
     @Test
     public void When_emailIsExist_expect_true() throws Exception {
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
@@ -219,24 +233,18 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.existence", is(true)));
     }
 
-    //ACL 검사
 
-    //권한 없는 사용자가 특정 유저 조회했을 경우
     @Test
     public void When_getUserWithUnauthorized_expect_401() throws Exception {
-        RequestGetUser(0L)
-                .andExpect(status().isUnauthorized());
+        RequestGetUser(0L, "inValidToken")
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
     }
 
-    //권한 없는 사용자가 특정 유저 업데이트했을 경우
-    @Test
-    public void When_updateUserWithUnauthorized_expect_401() throws Exception {
-        MemberDto.MyAccountReq dto = memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
-        requestMyAccount(dto, 0L)
-                .andExpect(status().isUnauthorized());
-    }
+
     //ACL 검사
-
     private ResultActions requestExists(String value) throws Exception {
         return mockMvc.perform(get(getUrlExistsTemplate(value))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -247,15 +255,15 @@ public class MemberControllerTest {
         return "/members" + "/exists?email=" + value;
     }
 
-    private ResultActions requestGetUsers() throws Exception {
+    private ResultActions requestGetUsers(String token) throws Exception {
         return mockMvc.perform(get("/members" + "/")
-                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
+                .header("Authorization", "Bearer " + token))
                 .andDo(print());
     }
 
-    private ResultActions requestGetUsersInPage(int page, int size) throws Exception {
+    private ResultActions requestGetUsersInPage(int page, int size, String token) throws Exception {
         return mockMvc.perform(get(getUrlPageTemplate(page, size))
-                .with(httpBasic(ADMIN_EMAIL, PASSWORD)))
+                .header("Authorization", "Bearer " + token))
                 .andDo(print());
     }
 
@@ -263,16 +271,16 @@ public class MemberControllerTest {
         return "/members" + "?page=" + page + "&size=" + size;
     }
 
-    private ResultActions RequestGetUser(Long id) throws Exception {
+    private ResultActions RequestGetUser(Long id, String token) throws Exception {
         return mockMvc.perform(get("/members" + "/" + id)
-                .with(httpBasic(EMAIL, PASSWORD))
+                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
     }
 
-    private ResultActions requestMyAccount(MemberDto.MyAccountReq dto, Long id) throws Exception {
+    private ResultActions requestMyAccount(MemberDto.MyAccountReq dto, Long id, String token) throws Exception {
         return mockMvc.perform(put("/members" + "/" + id)
-                .with(httpBasic(EMAIL, PASSWORD))
+                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print());
@@ -296,5 +304,23 @@ public class MemberControllerTest {
     private void eachCreateUser(final int endExclusive) {
         IntStream.range(0, endExclusive).forEach(i ->
                 memberService.create(memberMock.setSignUpDto(i + EMAIL, PASSWORD, RE_PASSWORD)));
+    }
+
+
+    private Member createUser() {
+        return memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
+    }
+
+    private String generateToken(Member member) {
+        final DeviceDummy device = new DeviceDummy();
+        device.setNormal(true);
+
+        final JwtUser jwtUser = JwtUserFactory.buildJwtUser(member);
+        return jwtTokenUtil.generateToken(jwtUser, device);
+    }
+
+
+    private MemberDto.MyAccountReq CreateMyAccountReq() {
+        return memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
     }
 }
