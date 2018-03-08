@@ -59,7 +59,7 @@ public class MemberControllerTest {
     @Autowired
     private FilterChainProxy springSecurityFilterChain;
     @Autowired
-    private MemberService memberService;
+    private MemberServiceImpl memberService;
     @Autowired
     private MemberRepository memberRepository;
 

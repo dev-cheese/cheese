@@ -15,7 +15,7 @@ import javax.validation.Valid;
 public class MemberController {
 
     @Autowired
-    private MemberService memberService;
+    private MemberServiceImpl memberService;
 
 
     @RequestMapping(method = RequestMethod.POST)

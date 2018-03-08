@@ -1,7 +1,7 @@
 package com.cheese.demo.security.controller;
 
 import com.cheese.demo.member.Member;
-import com.cheese.demo.member.MemberService;
+import com.cheese.demo.member.MemberServiceImpl;
 import com.cheese.demo.security.JwtTokenUtil;
 import com.cheese.demo.security.dto.JwtAuthenticationDto;
 import com.cheese.demo.security.service.UserDetailsServiceImpl;
@@ -38,7 +38,7 @@ public class AuthenticationController {
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private MemberService memberService;
+    private MemberServiceImpl memberService;
 
 
     @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.POST)
