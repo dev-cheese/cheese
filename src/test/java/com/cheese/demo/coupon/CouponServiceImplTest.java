@@ -12,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.Date;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -51,6 +54,8 @@ public class CouponServiceImplTest {
         assertThat(coupon.getDiscount(), is(dto.getDiscount()));
         assertThat(coupon.isExpiration()).isFalse();
         assertThat(coupon.getDiscount(), equalTo(dto.getDiscount()));
+        assertThat(coupon.getExpirationDate().after(Date.from(Instant.now())));
+
     }
 
 }

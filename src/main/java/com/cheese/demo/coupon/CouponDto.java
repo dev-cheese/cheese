@@ -12,7 +12,6 @@ public class CouponDto {
     @Getter
     public static class Creation {
         private Discount discount;
-        private Date expirationDate;
 
         @Builder
         public Creation(Discount discount) {
@@ -20,7 +19,7 @@ public class CouponDto {
         }
 
         public Coupon toEntity() {
-            this.expirationDate = calculateExpirationDate();
+            final Date expirationDate = calculateExpirationDate();
 
             return Coupon.builder()
                     .discount(discount)
