@@ -17,11 +17,15 @@ import java.util.stream.Collectors;
 @Transactional
 public class MemberService {
 
-    @Autowired
-    private MemberRepository memberRepository;
+
+    private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
+        this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Transactional
     public Member create(MemberDto.SignUpReq dto) {
@@ -47,6 +51,7 @@ public class MemberService {
         return new PageImpl<>(content, pageable, page.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
     public Member findById(Long id) {
         Member member = memberRepository.findOne(id);
         if (member != null)
@@ -55,6 +60,7 @@ public class MemberService {
             throw new MemberNotFoundException(id);
     }
 
+    @Transactional(readOnly = true)
     public Member findByEmail(String email) {
         Member member = memberRepository.findByEmail(email);
         if (member != null)
@@ -63,6 +69,7 @@ public class MemberService {
             throw new MemberNotFoundException(email);
     }
 
+    @Transactional(readOnly = true)
     public boolean isExistedEmail(String email) {
         return memberRepository.findByEmail(email) != null;
     }
