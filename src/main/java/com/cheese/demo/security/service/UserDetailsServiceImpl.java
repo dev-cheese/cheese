@@ -1,7 +1,7 @@
 package com.cheese.demo.security.service;
 
 import com.cheese.demo.member.Member;
-import com.cheese.demo.member.MemberService;
+import com.cheese.demo.member.MemberServiceImpl;
 import com.cheese.demo.security.JwtUserFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    private MemberService memberService;
+    private MemberServiceImpl memberService;
 
     @Override
     public UserDetails loadUserByUsername(final String email) throws UsernameNotFoundException {

@@ -3,7 +3,7 @@ package com.cheese.demo.security.controller;
 import com.cheese.demo.SpringServerApplication;
 import com.cheese.demo.commons.ErrorCodeEnum;
 import com.cheese.demo.member.Member;
-import com.cheese.demo.member.MemberService;
+import com.cheese.demo.member.MemberServiceImpl;
 import com.cheese.demo.mock.DeviceDummy;
 import com.cheese.demo.security.JwtTokenUtil;
 import com.cheese.demo.security.JwtUser;
@@ -46,7 +46,7 @@ public class AuthenticationControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private MemberService memberService;
+    private MemberServiceImpl memberService;
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;

@@ -18,14 +18,13 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SpringServerApplication.class)
 @Transactional
-public class MemberServiceTest {
-
-    @Autowired
-    private MemberService memberService;
+public class MemberServiceImplTest {
 
     private final String EMAIL = "cheese10yun@gmail.com";
     private final String PASSWORD = "password001";
     private final String RE_PASSWORD = "password001";
+    @Autowired
+    private MemberServiceImpl memberService;
     private MemberMock memberMock;
 
     @Before
