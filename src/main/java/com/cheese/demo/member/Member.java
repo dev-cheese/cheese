@@ -48,7 +48,7 @@ public class Member extends EntityBaseDateTime {
 
     // TODO: 2018. 2. 14. ROLE 픽스 된문제 해결 할것 -yun
     @Builder
-    public Member(long id, String email, String password, String lastName, String firstName, String mobile, Date dob, MemberRoleEnum role) {
+    public Member(Long id, String email, String password, String lastName, String firstName, String mobile, Date dob, MemberRoleEnum role) {
         this.id = id;
         this.email = email;
         this.password = password;

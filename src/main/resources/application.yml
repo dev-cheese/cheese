@@ -18,6 +18,10 @@ spring:
     password:
     driver-class-name: com.mysql.jdbc.Driver
 
+logging:
+  level:
+    ROOT: DEBUG
+
 jwt:
   header: Authorization
   secret: mySecret

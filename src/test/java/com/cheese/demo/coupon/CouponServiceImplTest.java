@@ -1,61 +1,91 @@
 package com.cheese.demo.coupon;
 
-import com.cheese.demo.SpringServerApplication;
-import com.cheese.demo.discount.Discount;
 import com.cheese.demo.discount.DiscountDto;
-import com.cheese.demo.discount.DiscountServiceImpl;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import java.time.Instant;
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
-
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = SpringServerApplication.class)
-@Transactional
+@RunWith(MockitoJUnitRunner.class)
 public class CouponServiceImplTest {
 
-    @Autowired
+    @Mock
+    private CouponRepository couponRepository;
+
+    @InjectMocks
     private CouponServiceImpl couponService;
 
-    @Autowired
-    private DiscountServiceImpl discountService;
-    private Discount discount;
+    @Test
+    public void create_AmountDiscountCoupon_ReturnCoupon() {
+        //given
+        final DiscountDto.Creation discountDto = buildAmountDiscountCreation();
+        final CouponDto.Creation couponDto = buildCouponCreation(discountDto);
+        final Coupon couponEntity = couponDto.toEntity();
+        given(couponRepository.save(Matchers.any(Coupon.class))).willReturn(couponEntity);
 
-    @Before
-    public void setUp() {
-        DiscountDto.Creation discountDto = DiscountDto.Creation.builder()
-                .amount(10)
-                .description("테스트")
-                .expiration(604800)
-                .build();
+        //when
+        final Coupon coupon = couponService.create(couponDto);
 
-        discount = discountService.create(discountDto);
+        //then
+        verify(couponRepository, atLeastOnce()).save(any(Coupon.class));
+        assertThat(coupon, equalTo(couponEntity));
+        assertThatProperty(couponDto, coupon);
     }
 
     @Test
-    public void create() {
-        CouponDto.Creation dto = CouponDto.Creation.builder()
-                .discount(discount)
-                .build();
+    public void create_RateDiscountCoupon_ReturnCoupon() {
+        //given
+        final DiscountDto.Creation discountDto = buildRateDiscountCreation();
+        final CouponDto.Creation couponDto = buildCouponCreation(discountDto);
+        final Coupon couponEntity = couponDto.toEntity();
+        given(couponRepository.save(Matchers.any(Coupon.class))).willReturn(couponEntity);
 
-        Coupon coupon = couponService.create(dto);
-        assertThat(coupon.getDiscount(), is(dto.getDiscount()));
-        assertThat(coupon.isExpiration()).isFalse();
-        assertThat(coupon.getDiscount(), equalTo(dto.getDiscount()));
-        assertThat(coupon.getExpirationDate().after(Date.from(Instant.now())));
+        //when
+        final Coupon coupon = couponService.create(couponDto);
 
+        //then
+        verify(couponRepository, atLeastOnce()).save(any(Coupon.class));
+        assertThat(coupon, equalTo(couponEntity));
+        assertThatProperty(couponDto, coupon);
     }
 
+    private void assertThatProperty(CouponDto.Creation couponDto, Coupon coupon) {
+        //테스트 커버리지를 위한 검사
+        assertThat(coupon.getDiscount(), is(couponDto.getDiscount()));
+        assertThat(coupon.isExpiration(), is(false));
+        assertThat(coupon.getId(), is(nullValue()));
+        assertThat(coupon.getExpirationDate().getTime(), greaterThan(System.currentTimeMillis()));
+    }
+
+    private CouponDto.Creation buildCouponCreation(DiscountDto.Creation discountDto) {
+        return CouponDto.Creation.builder()
+                .discount(discountDto.toEntity())
+                .build();
+    }
+
+    private DiscountDto.Creation buildAmountDiscountCreation() {
+        return DiscountDto.Creation.builder()
+                .amount(10)
+                .description("10 discount amount coupon")
+                .expiration(604800)
+                .build();
+    }
+
+    private DiscountDto.Creation buildRateDiscountCreation() {
+        return DiscountDto.Creation.builder()
+                .rate(0.4)
+                .description("0.4 rate amount coupon")
+                .expiration(604800)
+                .build();
+    }
 }
