@@ -15,7 +15,7 @@ public class Coupon {
 
     @Id
     @GeneratedValue
-    private long id;
+    private Long id;
 
     @Column(name = "expiration_date")
     private Date expirationDate;

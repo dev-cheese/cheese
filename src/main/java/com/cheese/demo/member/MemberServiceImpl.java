@@ -46,6 +46,7 @@ public class MemberServiceImpl implements MemberService {
         return dto.toEntity(findById(id));
     }
 
+    @Transactional(readOnly = true)
     public PageImpl<MemberDto.Res> findAll(Pageable pageable) {
         Page<Member> page = memberRepository.findAll(pageable);
         List<MemberDto.Res> content = convertResDto(page);
