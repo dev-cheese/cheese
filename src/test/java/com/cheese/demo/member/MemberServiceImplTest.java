@@ -11,10 +11,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -163,7 +163,6 @@ public class MemberServiceImplTest {
     }
 
     private void assertThatProperty(MemberDto.SignUpReq dto, Member memberEntity, Member member) {
-        assertThat(member.getId(), is(nullValue()));
         assertThat(member.getEmail(), is(dto.getEmail()));
         assertThat(member.getFirstName(), is(memberEntity.getFirstName()));
         assertThat(member.getLastName(), is(memberEntity.getLastName()));
