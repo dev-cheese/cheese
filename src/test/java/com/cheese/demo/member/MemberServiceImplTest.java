@@ -2,6 +2,7 @@ package com.cheese.demo.member;
 
 import com.cheese.demo.member.exception.EmailDuplicationException;
 import com.cheese.demo.member.exception.MemberNotFoundException;
+import com.cheese.demo.mock.MemberMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +31,7 @@ public class MemberServiceImplTest {
 
 
     private MemberServiceImpl memberService;
-
+    private MemberMock memberMock = new MemberMock();
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Before
@@ -152,11 +153,13 @@ public class MemberServiceImplTest {
     }
 
     private MemberDto.SignUpReq buildSignUp() {
-        return MemberDto.SignUpReq.builder()
-                .email("cheese10yun@gmail.com")
-                .password("password001")
-                .rePassword("password001")
-                .build();
+//        return MemberDto.SignUpReq.builder()
+//                .email("cheese10yun@gmail.com")
+//                .password("password001")
+//                .rePassword("password001")
+//                .build();
+
+        return memberMock.setSignUpDto("cheese10yun@gmail.com", "password001", "password001");
     }
 
     private void assertThatProperty(MemberDto.SignUpReq dto, Member memberEntity, Member member) {

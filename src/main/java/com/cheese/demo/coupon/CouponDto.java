@@ -1,6 +1,7 @@
 package com.cheese.demo.coupon;
 
 import com.cheese.demo.discount.Discount;
+import com.cheese.demo.member.Member;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,10 +13,12 @@ public class CouponDto {
     @Getter
     public static class Creation {
         private Discount discount;
+        private Member member;
 
         @Builder
-        public Creation(Discount discount) {
+        public Creation(Discount discount, Member member) {
             this.discount = discount;
+            this.member = member;
         }
 
         public Coupon toEntity() {
@@ -23,6 +26,7 @@ public class CouponDto {
 
             return Coupon.builder()
                     .discount(discount)
+                    .member(member)
                     .expirationDate(expirationDate)
                     .build();
         }
