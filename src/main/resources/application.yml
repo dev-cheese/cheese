@@ -20,7 +20,7 @@ spring:
 
 logging:
   level:
-    ROOT: DEBUG
+    ROOT: error
 
 jwt:
   header: Authorization
