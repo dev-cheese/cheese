@@ -1,6 +1,7 @@
 package com.cheese.demo.member;
 
 import com.cheese.demo.commons.EntityBaseDateTime;
+import com.cheese.demo.coupon.Coupon;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +11,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "member")
@@ -19,7 +22,7 @@ public class Member extends EntityBaseDateTime {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private long id;
 
     @NotEmpty
     @Email
@@ -46,9 +49,13 @@ public class Member extends EntityBaseDateTime {
     @Column(name = "role", nullable = false, columnDefinition = "varchar(20) default 'USER'")
     private MemberRoleEnum role;
 
+    @OneToMany(mappedBy = "member")
+    private List<Coupon> coupons = new ArrayList<Coupon>();
+
+
     // TODO: 2018. 2. 14. ROLE 픽스 된문제 해결 할것 -yun
     @Builder
-    public Member(Long id, String email, String password, String lastName, String firstName, String mobile, Date dob, MemberRoleEnum role) {
+    public Member(long id, String email, String password, String lastName, String firstName, String mobile, Date dob, MemberRoleEnum role) {
         this.id = id;
         this.email = email;
         this.password = password;
