@@ -25,14 +25,19 @@ public class CouponDto {
             final Date expirationDate = calculateExpirationDate();
 
             return Coupon.builder()
-                    .discount(discount)
-                    .member(member)
+                    .discount(this.discount)
+                    .member(this.member)
+                    .code(makeCode())
                     .expirationDate(expirationDate)
                     .build();
         }
 
         private Date calculateExpirationDate() {
-            return new Date(System.currentTimeMillis() + discount.getExpiration() * 1000);
+            return new Date(System.currentTimeMillis() + this.discount.getExpiration() * 1000);
+        }
+
+        private String makeCode() {
+            return "중복되지 않는 값을 넣기 위해서는???";
         }
     }
 }

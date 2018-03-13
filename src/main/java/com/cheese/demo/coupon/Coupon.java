@@ -21,6 +21,9 @@ public class Coupon {
     @Column(name = "expiration_date")
     private Date expirationDate;
 
+    @Column(name = "code", unique = true, nullable = false, updatable = false)
+    private String code;
+
     @Lob
     @Column(name = "used", nullable = false)
     private boolean used;
@@ -39,13 +42,13 @@ public class Coupon {
     @JoinColumn(name = "member_id", nullable = false, updatable = false)
     private Member member;
 
-
     @Builder
-    public Coupon(Date expirationDate, Discount discount, Member member, boolean used) {
+    public Coupon(Date expirationDate, Discount discount, Member member, boolean used, String code) {
         this.expirationDate = expirationDate;
         this.discount = discount;
         this.member = member;
         this.used = used;
+        this.code = code;
     }
 
     public boolean isExpiration() {

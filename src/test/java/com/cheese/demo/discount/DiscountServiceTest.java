@@ -14,13 +14,13 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DiscountServiceImplTest {
+public class DiscountServiceTest {
 
     @Mock
     private DiscountRepository discountRepository;
 
     @InjectMocks
-    private DiscountServiceImpl discountService;
+    private DiscountService discountService;
 
     @Test
     public void create_valid_ReturnCouponDiscountObject() {

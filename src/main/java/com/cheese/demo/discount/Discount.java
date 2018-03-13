@@ -16,7 +16,7 @@ public class Discount {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private DiscountIdEnum id;
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
@@ -40,10 +40,11 @@ public class Discount {
     private List<Coupon> coupons = new ArrayList<Coupon>();
 
     @Builder
-    public Discount(String description, int amount, double rate, long expiration) {
+    public Discount(String description, int amount, double rate, long expiration, DiscountIdEnum id) {
         this.description = description;
         this.amount = amount;
         this.rate = rate;
         this.expiration = expiration;
+        this.id = id;
     }
 }
