@@ -8,13 +8,15 @@ public class DiscountDto {
     @Getter
     public static class Creation {
 
+        private DiscountIdEnum id;
         private String description;
         private int amount;
         private double rate;
         private long expiration;
 
         @Builder
-        public Creation(String description, int amount, double rate, long expiration) {
+        public Creation(DiscountIdEnum id, String description, int amount, double rate, long expiration) {
+            this.id = id;
             this.description = description;
             this.amount = amount;
             this.rate = rate;
@@ -23,6 +25,7 @@ public class DiscountDto {
 
         public Discount toEntity() {
             return Discount.builder()
+                    .id(id)
                     .description(description)
                     .amount(amount)
                     .rate(rate)
