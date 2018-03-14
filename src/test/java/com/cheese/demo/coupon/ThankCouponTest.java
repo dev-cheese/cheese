@@ -21,7 +21,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyLong;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InviteeCouponServiceTest {
+public class ThankCouponTest {
 
     private final String email = "cheese10yun@gmail.com";
     private final String password = "password001";
@@ -38,48 +38,35 @@ public class InviteeCouponServiceTest {
     private DiscountService discountService;
 
     @InjectMocks
-    private InviteeCouponService inviteeCouponService;
-
+    private ThankCoupon thankCoupon;
 
     @Test
     public void issue() {
         //given
-        final DiscountDto.Creation discountDto = buildRateDiscount();
+        final DiscountDto.Creation discountDto = buildAmountDiscount();
         final MemberDto.SignUpReq memberDto = buildSignUp(email);
         final CouponDto.Creation couponDto = buildCouponCreation(discountDto, memberDto);
         final Coupon couponEntity = couponDto.toEntity();
         final Member member = toMemberEntity(memberDto);
 
         given(memberService.findById(anyLong())).willReturn(member);
-        given(discountService.findById(DiscountIdEnum.R001)).willReturn(discountDto.toEntity());
+        given(discountService.findById(DiscountIdEnum.T001)).willReturn(discountDto.toEntity());
         given(couponRepository.save(Matchers.any(Coupon.class))).willReturn(couponEntity);
 
         //when
-        inviteeCouponService.issue(member.getId(), DiscountIdEnum.R001);
+        thankCoupon.issue(member.getId(), DiscountIdEnum.T001);
+
 
     }
 
     @Test
-    public void canIssued_Issued_False() {
+    public void canIssued() {
         final MemberDto.SignUpReq memberDto = buildSignUp("admin001@test.com");
         //given
         Member member = toMemberEntity(memberDto);
 
         //when
-        boolean canIssued = inviteeCouponService.canIssued(member);
-
-        //then
-        assertThat(canIssued, is(false));
-    }
-
-    @Test
-    public void canIssued_NotIssued_True() {
-        final MemberDto.SignUpReq memberDto = buildSignUp(email);
-        //given
-        Member member = toMemberEntity(memberDto);
-
-        //when
-        boolean canIssued = inviteeCouponService.canIssued(member);
+        boolean canIssued = thankCoupon.canIssued(member);
 
         //then
         assertThat(canIssued, is(true));
@@ -97,9 +84,9 @@ public class InviteeCouponServiceTest {
         return memberMock.setSignUpDto(email, password, password);
     }
 
-    private DiscountDto.Creation buildRateDiscount() {
+    private DiscountDto.Creation buildAmountDiscount() {
         return DiscountDto.Creation.builder()
-                .id(DiscountIdEnum.R001)
+                .id(DiscountIdEnum.T001)
                 .rate(0.4)
                 .description("0.4 rate amount coupon")
                 .expiration(604800)

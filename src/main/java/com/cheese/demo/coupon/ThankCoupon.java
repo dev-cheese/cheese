@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
  * 발급 조건이 없는 쿠폰
  */
 @Component
-public class ThankCouponService extends CouponServiceAbs {
+public class ThankCoupon extends CouponIssueManager {
 
-    public ThankCouponService(CouponRepository couponRepository, MemberServiceImpl memberService, DiscountService discountService) {
+    public ThankCoupon(CouponRepository couponRepository, MemberServiceImpl memberService, DiscountService discountService) {
         super(couponRepository, memberService, discountService);
     }
 

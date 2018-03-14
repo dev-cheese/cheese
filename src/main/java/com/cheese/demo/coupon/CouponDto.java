@@ -37,7 +37,7 @@ public class CouponDto {
         }
 
         private String makeCode() {
-            return "중복되지 않는 값을 넣기 위해서는???";
+            return "쿠폰만들자";
         }
     }
 }

@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public abstract class CouponServiceAbs {
+public abstract class CouponIssueManager {
 
     protected final MemberServiceImpl memberService;
     private final DiscountService discountService;
     private final CouponRepository couponRepository;
 
     @Autowired
-    protected CouponServiceAbs(CouponRepository couponRepository, MemberServiceImpl memberService, DiscountService discountService) {
+    protected CouponIssueManager(CouponRepository couponRepository, MemberServiceImpl memberService, DiscountService discountService) {
         this.couponRepository = couponRepository;
         this.memberService = memberService;
         this.discountService = discountService;

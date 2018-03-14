@@ -7,9 +7,9 @@ import com.cheese.demo.member.MemberServiceImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InviteeCouponService extends CouponServiceAbs {
+public class InviteeCoupon extends CouponIssueManager {
 
-    public InviteeCouponService(MemberServiceImpl memberService, DiscountService discountService, CouponRepository couponRepository) {
+    public InviteeCoupon(MemberServiceImpl memberService, DiscountService discountService, CouponRepository couponRepository) {
         super(couponRepository, memberService, discountService);
     }
 

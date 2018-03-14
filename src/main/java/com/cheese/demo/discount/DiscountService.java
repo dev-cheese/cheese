@@ -1,6 +1,6 @@
 package com.cheese.demo.discount;
 
-import com.cheese.demo.discount.exception.NotFoundDiscountException;
+import com.cheese.demo.discount.exception.DiscountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +23,7 @@ public class DiscountService {
     public Discount findById(DiscountIdEnum id) {
         final Discount discount = discountRepository.findOne(id);
         if (discount == null)
-            throw new NotFoundDiscountException(id);
+            throw new DiscountNotFoundException(id);
 
         return discount;
     }

@@ -5,9 +5,9 @@ import com.cheese.demo.discount.DiscountIdEnum;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class NotFoundDiscountException extends RuntimeException {
+public class DiscountNotFoundException extends RuntimeException {
 
-    public NotFoundDiscountException(DiscountIdEnum id) {
+    public DiscountNotFoundException(DiscountIdEnum id) {
         super(String.valueOf(ErrorCodeEnum.DISCOUNT_NOT_FOUND));
         log.error(ErrorCodeEnum.DISCOUNT_NOT_FOUND.getMessage(), id);
     }
