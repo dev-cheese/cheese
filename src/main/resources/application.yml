@@ -20,12 +20,7 @@ spring:
 
 logging:
   level:
-    ROOT: DEBUG
-
-#security:
-#  oauth2:
-#    resource:
-#      filter-order: 3
+    ROOT: error
 
 
 

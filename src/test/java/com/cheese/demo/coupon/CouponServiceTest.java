@@ -1,13 +1,16 @@
 package com.cheese.demo.coupon;
 
+import com.cheese.demo.coupon.exception.CouponNotFoundException;
+import com.cheese.demo.discount.Discount;
 import com.cheese.demo.discount.DiscountDto;
+import com.cheese.demo.member.Member;
 import com.cheese.demo.member.MemberDto;
 import com.cheese.demo.member.MemberRoleEnum;
 import com.cheese.demo.mock.MemberMock;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -15,12 +18,10 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyLong;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CouponServiceImplTest {
+public class CouponServiceTest {
 
     private final String email = "cheese10yun@gmail.com";
     private final String password = "password001";
@@ -28,50 +29,55 @@ public class CouponServiceImplTest {
     private CouponRepository couponRepository;
 
     @InjectMocks
-    private CouponServiceImpl couponService;
+    private CouponService couponService;
 
     private MemberMock memberMock = new MemberMock();
 
-    @Test
-    public void create_AmountDiscountCoupon_ReturnCoupon() {
-        //given
-        final DiscountDto.Creation discountDto = buildAmountDiscountCreation();
-        final MemberDto.SignUpReq memberDto = buildSignUp();
-        final CouponDto.Creation couponDto = buildCouponCreation(discountDto, memberDto);
-        final Coupon couponEntity = couponDto.toEntity();
-        given(couponRepository.save(Matchers.any(Coupon.class))).willReturn(couponEntity);
+    private Discount amountDiscount;
+    private Discount rateDiscount;
+    private Member member;
+    private CouponDto.Creation amountCoupon;
+    private CouponDto.Creation discountCoupon;
 
 
-        //when
-        final Coupon coupon = couponService.create(couponDto);
-
-        //then
-        verify(couponRepository, atLeastOnce()).save(any(Coupon.class));
-        assertThat(coupon, equalTo(couponEntity));
-        assertThatProperty(couponDto, coupon);
+    @Before
+    public void setUp() {
+        amountDiscount = buildAmountDiscountCreation().toEntity();
+        rateDiscount = buildRateDiscountCreation().toEntity();
+        member = toEntityMember(buildSignUp());
+        amountCoupon = buildCouponCreation(buildAmountDiscountCreation(), buildSignUp());
+        discountCoupon = buildCouponCreation(buildRateDiscountCreation(), buildSignUp());
     }
 
     @Test
-    public void create_RateDiscountCoupon_ReturnCoupon() {
+    public void findById_Existed_ReturnCoupon() {
         //given
-        final DiscountDto.Creation discountDto = buildRateDiscountCreation();
-        final MemberDto.SignUpReq memberDto = buildSignUp();
-        final CouponDto.Creation couponDto = buildCouponCreation(discountDto, memberDto);
-        final Coupon couponEntity = couponDto.toEntity();
-        given(couponRepository.save(Matchers.any(Coupon.class))).willReturn(couponEntity);
+        given(couponRepository.findOne(anyLong())).willReturn(amountCoupon.toEntity());
 
         //when
-        final Coupon coupon = couponService.create(couponDto);
+        Coupon coupon = couponService.findById(anyLong());
 
         //then
-        verify(couponRepository, atLeastOnce()).save(any(Coupon.class));
-        assertThat(coupon, equalTo(couponEntity));
-        assertThatProperty(couponDto, coupon);
+        assertThatProperty(amountCoupon, coupon);
+    }
+
+    @Test(expected = CouponNotFoundException.class)
+    public void findById_NotExisted_NotFoundCouponException() {
+        //given
+        given(couponRepository.findOne(anyLong())).willReturn(null);
+
+        //when
+        couponService.findById(anyLong());
+    }
+
+    private Member toEntityMember(MemberDto.SignUpReq signUpReq) {
+        return signUpReq.toEntity(password, MemberRoleEnum.USER);
     }
 
     private void assertThatProperty(CouponDto.Creation couponDto, Coupon coupon) {
         //테스트 커버리지를 위한 검사
         assertThat(coupon.getDiscount(), is(couponDto.getDiscount()));
+        assertThat(coupon.getCode(), is(notNullValue()));
         assertThat(coupon.isExpiration(), is(false));
         assertThat(coupon.getId(), is(nullValue()));
         assertThat(coupon.isUsed(), is(false));
@@ -80,12 +86,13 @@ public class CouponServiceImplTest {
         assertThat(couponDto.getMember().getEmail(), is(email));
         assertThat(coupon.getExpirationDate().getTime(), greaterThan(System.currentTimeMillis()));
 
+
     }
 
     private CouponDto.Creation buildCouponCreation(DiscountDto.Creation discountDto, MemberDto.SignUpReq memberDto) {
         return CouponDto.Creation.builder()
                 .discount(discountDto.toEntity())
-                .member(memberDto.toEntity(password, MemberRoleEnum.USER))
+                .member(toEntityMember(memberDto))
                 .build();
     }
 
