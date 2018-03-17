@@ -20,13 +20,20 @@ spring:
 
 logging:
   level:
-    ROOT: error
+    ROOT: DEBUG
 
-jwt:
-  header: Authorization
-  secret: mySecret
-  expiration: 604800
-  route:
-    authentication:
-      path: auth
-      refresh: refresh
+#security:
+#  oauth2:
+#    resource:
+#      filter-order: 3
+
+
+
+#jwt:
+#  header: Authorization
+#  secret: mySecret
+#  expiration: 604800
+#  route:
+#    authentication:
+#      path: auth
+#      refresh: refresh

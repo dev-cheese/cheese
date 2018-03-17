@@ -2,16 +2,13 @@ package com.cheese.demo.member;
 
 import com.cheese.demo.SpringServerApplication;
 import com.cheese.demo.commons.ErrorCodeEnum;
-import com.cheese.demo.mock.DeviceDummy;
 import com.cheese.demo.mock.MemberMock;
-import com.cheese.demo.security.JwtTokenUtil;
-import com.cheese.demo.security.JwtUser;
-import com.cheese.demo.security.JwtUserFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.FilterChainProxy;
@@ -20,8 +17,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
@@ -29,9 +29,11 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -47,33 +49,41 @@ public class MemberControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private FilterChainProxy springSecurityFilterChain;
+
     private final String PASSWORD = "password001";
     private final String RE_PASSWORD = "password001";
-    private final String EMAIL = "cheese10yun@gmail.com";
+    private final String EMAIL = "wan@gmail.com";
 
     private final String FIRST_NAME = "길동";
     private final String LAST_NAME = "홍";
     private final String MOBILE = "01071333262";
     private final Date DOB = Date.valueOf(LocalDate.now());
-    private final String ADMIN_EMAIL = "admin001@gmail.com";
-    @Autowired
-    private FilterChainProxy springSecurityFilterChain;
+    private final String ADMIN_EMAIL = "wan@gmail.com";
+
+    private String CONTENT_TYPE = "application/json;charset=UTF-8";
+    private String SCOPE = "read";
+    private String CLIENT_ID = "foo";
+    private String CLIENT_SECRET = "bar";
+    private String AUTHORIZATION = "Authorization";
+    private String BEARER = "Bearer ";
+//    @Autowired
+//    private FilterChainProxy springSecurityFilterChain;
     @Autowired
     private MemberServiceImpl memberService;
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+//    @Autowired
+//    private JwtTokenUtil jwtTokenUtil;
     private MockMvc mockMvc;
     private MemberMock memberMock;
 
     @Before
     public void setUp() {
         memberMock = new MemberMock();
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(springSecurity())
-                .build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).addFilter(springSecurityFilterChain).build();
     }
 
     @Test
@@ -312,15 +322,43 @@ public class MemberControllerTest {
     }
 
     private String generateToken(Member member) {
-        final DeviceDummy device = new DeviceDummy();
-        device.setNormal(true);
-
-        final JwtUser jwtUser = JwtUserFactory.buildJwtUser(member);
-        return jwtTokenUtil.generateToken(jwtUser, device);
+        return obtainAccessToken(member.getEmail(), member.getPassword());
     }
 
 
     private MemberDto.MyAccountReq CreateMyAccountReq() {
         return memberMock.setMyAccountDto(FIRST_NAME, LAST_NAME, MOBILE, DOB);
+    }
+
+    private String obtainAccessToken(String username, String password) {
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "password");
+        params.add("client_id", CLIENT_ID);
+        params.add("username", username);
+        params.add("password", password);
+        params.add("scope", SCOPE);
+
+        ResultActions result
+                = null;
+        try {
+            result = mockMvc.perform(post("/oauth/token")
+            .params(params)
+            .with(httpBasic(CLIENT_ID, CLIENT_SECRET))
+            .accept(CONTENT_TYPE))
+            .andExpect(content().contentType(CONTENT_TYPE));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String resultString = null;
+        try {
+            resultString = result.andReturn().getResponse().getContentAsString();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        JacksonJsonParser jsonParser = new JacksonJsonParser();
+        return jsonParser.parseMap(resultString).get("access_token").toString();
     }
 }

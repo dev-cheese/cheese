@@ -1,92 +1,107 @@
 package com.cheese.demo.config;
 
-import com.cheese.demo.security.JwtAuthenticationEntryPoint;
-import com.cheese.demo.security.JwtAuthenticationTokenFilter;
+import com.cheese.demo.security.service.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import javax.sql.DataSource;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableResourceServer
+//@Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
-
-    @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    private final String ADMIN = "ADMIN";
-    private final String USER = "USER";
-    private final String MEMBER_URL_PATH = "/members";
-
-
-    @Autowired
-    public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder
-                .userDetailsService(this.userDetailsService)
-                .passwordEncoder(passwordEncoder());
-    }
-
+//
+//    @Autowired
+//    private UserDetailsServiceImpl userDetailsServiceImple;
+//
+//    private final String ADMIN = "ADMIN";
+//    private final String USER = "USER";
+//    private final String MEMBER_URL_PATH = "/members";
+//
+//
+//    @Autowired
+//    private AuthenticationManager authenticationManager;
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth)
+//            throws Exception {
+//        auth.parentAuthenticationManager(authenticationManager).userDetailsService(userDetailsServiceImple);
+//    }
+//
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http
+//                .csrf().disable()
+//                .anonymous().disable()
+//                .authorizeRequests()
+//                .antMatchers("/api-docs/**").permitAll();
+//    }
+//
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public JwtAuthenticationTokenFilter authenticationTokenFilterBean() {
-        return new JwtAuthenticationTokenFilter();
+    /**
+     * Constructor disables the default security settings
+     */
+    public WebSecurityConfig() {
+        super(true);
     }
+
+//    @Override
+//    public void configure(WebSecurity web) throws Exception {
+//        web.ignoring().antMatchers("/login");
+//    }
 
     @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                // we don't need CSRF because our token is invulnerable
-                .csrf().disable()
-
-                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
-
-                // don't buildJwtUser session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-
-                .authorizeRequests()
-                //.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                // browser
-                .antMatchers("/browser/**").permitAll()
-
-                .antMatchers("/auth/**").permitAll()
-                .antMatchers(HttpMethod.POST, MEMBER_URL_PATH).permitAll()
-                .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/exists**").permitAll()
-                .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/{id}").authenticated()
-                .antMatchers(HttpMethod.PUT, MEMBER_URL_PATH + "/{id}").authenticated()
-                .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/**").authenticated()
-//                .anyRequest().denyAll();
-                .anyRequest().authenticated();
-
-        // Custom JWT based security filter
-        httpSecurity
-                .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
-
-        // disable page caching
-        httpSecurity
-                .headers()
-                .frameOptions().sameOrigin()  // required to set for H2 else H2 Console will be blank.
-                .cacheControl();
+    public void configure(HttpSecurity http) throws Exception {
+        http.antMatcher("/gigy/**")
+                .authorizeRequests().anyRequest().authenticated();
     }
-}
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+//    @Override
+    @Bean
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+    }
+
+    @Bean
+    public TokenStore JdbcTokenStore(@Qualifier("dataSource") DataSource dataSource) {
+        return new JdbcTokenStore(dataSource);
+    }
+
+}
+//
