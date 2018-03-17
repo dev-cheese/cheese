@@ -20,6 +20,4 @@ after_success:
   - mvn clean cobertura:cobertura coveralls:report
 
 notifications:
-  email:
-    recipients:
-      - cheese10yun@gmail.com
+  slack: cheese-dev:JXKSTVY4wHsMPbJi2uoKtyxs
