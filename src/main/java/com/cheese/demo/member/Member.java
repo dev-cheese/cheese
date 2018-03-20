@@ -50,10 +50,8 @@ public class Member extends EntityBaseDateTime {
     private MemberRoleEnum role;
 
     @OneToMany(mappedBy = "member")
-    private List<Coupon> coupons = new ArrayList<Coupon>();
+    private List<Coupon> coupons = new ArrayList<>();
 
-
-    // TODO: 2018. 2. 14. ROLE 픽스 된문제 해결 할것 -yun
     @Builder
     public Member(long id, String email, String password, String lastName, String firstName, String mobile, Date dob, MemberRoleEnum role) {
         this.id = id;
@@ -65,4 +63,12 @@ public class Member extends EntityBaseDateTime {
         this.dob = dob;
         this.role = role;
     }
+
+    public void update(MemberDto.MyAccountReq dto) {
+        this.lastName = dto.getLastName();
+        this.firstName = dto.getFirstName();
+        this.mobile = dto.getMobile();
+        this.dob = dto.getDob();
+    }
+
 }

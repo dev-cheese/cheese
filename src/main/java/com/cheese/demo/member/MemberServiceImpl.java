@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
@@ -42,10 +41,13 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Member update(Long id, MemberDto.MyAccountReq dto) {
-        return dto.toEntity(findById(id));
+    public Member update(long id, MemberDto.MyAccountReq dto) {
+        final Member member = findById(id);
+        member.update(dto);
+        return member;
     }
 
+    @Override
     @Transactional(readOnly = true)
     public PageImpl<MemberDto.Res> findAll(Pageable pageable) {
         Page<Member> page = memberRepository.findAll(pageable);
