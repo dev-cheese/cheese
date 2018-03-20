@@ -70,6 +70,35 @@ public class CouponServiceTest {
         couponService.findById(anyLong());
     }
 
+    @Test
+    public void doUse_Succeed_UsedIsTrue() {
+        //given
+        final Coupon coupon = amountCoupon.toEntity();
+        given(couponRepository.findOne(anyLong())).willReturn(coupon);
+
+        //when
+        coupon.doUse();
+
+        //then
+        assertThat(coupon.isUsed(), is(true));
+        assertThat(coupon.isUseAvailable(), is(false));
+    }
+
+    @Test
+    public void cancelUse_Succeed_UsedIsFalse() {
+        //given
+        final Coupon coupon = amountCoupon.toEntity();
+        given(couponRepository.findOne(anyLong())).willReturn(coupon);
+
+        //when
+        coupon.cancelUse();
+
+        //then
+        assertThat(coupon.isUsed(), is(false));
+        assertThat(coupon.isUseAvailable(), is(true));
+
+    }
+
     private Member toEntityMember(MemberDto.SignUpReq signUpReq) {
         return signUpReq.toEntity(password, MemberRoleEnum.USER);
     }
@@ -85,8 +114,6 @@ public class CouponServiceTest {
         assertThat(coupon.getMember().getEmail(), is(email));
         assertThat(couponDto.getMember().getEmail(), is(email));
         assertThat(coupon.getExpirationDate().getTime(), greaterThan(System.currentTimeMillis()));
-
-
     }
 
     private CouponDto.Creation buildCouponCreation(DiscountDto.Creation discountDto, MemberDto.SignUpReq memberDto) {
