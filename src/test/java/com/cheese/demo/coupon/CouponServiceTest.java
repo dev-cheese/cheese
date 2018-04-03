@@ -70,6 +70,32 @@ public class CouponServiceTest {
         couponService.findById(anyLong());
     }
 
+    @Test
+    public void doUse() {
+        //given
+        final Coupon coupon = amountCoupon.toEntity();
+
+        //when
+        coupon.doUse();
+
+        //then
+        assertThat(coupon.isUsed(), is(true));
+        assertThat(coupon.isUseAvailable(), is(false));
+    }
+
+    @Test
+    public void cancelUse() {
+        //given
+        final Coupon coupon = amountCoupon.toEntity();
+
+        //when
+        coupon.cancelUse();
+
+        //then
+        assertThat(coupon.isUsed(), is(false));
+        assertThat(coupon.isUseAvailable(), is(true));
+    }
+
     private Member toEntityMember(MemberDto.SignUpReq signUpReq) {
         return signUpReq.toEntity(password, MemberRoleEnum.USER);
     }
