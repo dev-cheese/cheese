@@ -71,10 +71,9 @@ public class CouponServiceTest {
     }
 
     @Test
-    public void doUse_Succeed_UsedIsTrue() {
+    public void doUse() {
         //given
         final Coupon coupon = amountCoupon.toEntity();
-        given(couponRepository.findOne(anyLong())).willReturn(coupon);
 
         //when
         coupon.doUse();
@@ -85,10 +84,9 @@ public class CouponServiceTest {
     }
 
     @Test
-    public void cancelUse_Succeed_UsedIsFalse() {
+    public void cancelUse() {
         //given
         final Coupon coupon = amountCoupon.toEntity();
-        given(couponRepository.findOne(anyLong())).willReturn(coupon);
 
         //when
         coupon.cancelUse();
@@ -96,7 +94,6 @@ public class CouponServiceTest {
         //then
         assertThat(coupon.isUsed(), is(false));
         assertThat(coupon.isUseAvailable(), is(true));
-
     }
 
     private Member toEntityMember(MemberDto.SignUpReq signUpReq) {
