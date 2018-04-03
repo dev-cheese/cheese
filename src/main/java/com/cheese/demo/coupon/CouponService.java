@@ -23,4 +23,5 @@ public class CouponService {
             throw new CouponNotFoundException(id);
         return coupon;
     }
+
 }

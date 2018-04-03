@@ -111,8 +111,6 @@ public class CouponServiceTest {
         assertThat(coupon.getMember().getEmail(), is(email));
         assertThat(couponDto.getMember().getEmail(), is(email));
         assertThat(coupon.getExpirationDate().getTime(), greaterThan(System.currentTimeMillis()));
-
-
     }
 
     private CouponDto.Creation buildCouponCreation(DiscountDto.Creation discountDto, MemberDto.SignUpReq memberDto) {

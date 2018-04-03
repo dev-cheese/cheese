@@ -8,20 +8,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
-//@RunWith(SpringRunner.class)
-//@SpringBootTest(classes = SpringServerApplication.class)
-//@Transactional
 @RunWith(MockitoJUnitRunner.class)
 public class MemberServiceImplTest {
 
@@ -30,20 +33,23 @@ public class MemberServiceImplTest {
     private MemberRepository memberRepository;
 
 
-    private MemberServiceImpl memberService;
+    private MemberService memberService;
     private MemberMock memberMock = new MemberMock();
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    private MemberDto.SignUpReq dto;
+    private Member memberEntity;
 
     @Before
     public void setUp() {
         memberService = new MemberServiceImpl(memberRepository, passwordEncoder);
+        dto = buildSignUp();
+        memberEntity = toEntity(dto);
     }
 
     @Test
     public void create_Succeed_ReturnMember() {
         //given
-        final MemberDto.SignUpReq dto = buildSignUp();
-        final Member memberEntity = toEntity(dto);
         given(memberRepository.save(any(Member.class))).willReturn(memberEntity);
 
         //when
@@ -58,8 +64,6 @@ public class MemberServiceImplTest {
     @Test(expected = EmailDuplicationException.class)
     public void create_ExistedEmail_EmailDuplicationException() {
         //given
-        final MemberDto.SignUpReq dto = buildSignUp();
-        final Member memberEntity = toEntity(dto);
         given(memberRepository.findByEmail(anyString())).willReturn(memberEntity);
 
         //when
@@ -82,8 +86,6 @@ public class MemberServiceImplTest {
     @Test
     public void isExistedEmail_ExistedEmail_ReturnTrue() {
         //given
-        MemberDto.SignUpReq dto = buildSignUp();
-        final Member memberEntity = toEntity(dto);
         given(memberRepository.findByEmail(anyString())).willReturn(memberEntity);
 
         //when
@@ -98,8 +100,6 @@ public class MemberServiceImplTest {
     @Test
     public void findById_ExistedId_ReturnMember() {
         //given
-        MemberDto.SignUpReq dto = buildSignUp();
-        final Member memberEntity = toEntity(dto);
         given(memberRepository.findOne(anyLong())).willReturn(memberEntity);
 
         //when
@@ -124,8 +124,6 @@ public class MemberServiceImplTest {
     @Test
     public void findByEmail_ExistedEmail_ReturnMember() {
         //given
-        MemberDto.SignUpReq dto = buildSignUp();
-        final Member memberEntity = toEntity(dto);
         given(memberRepository.findByEmail(anyString())).willReturn(memberEntity);
 
         //when
@@ -148,18 +146,70 @@ public class MemberServiceImplTest {
     }
 
 
+    @Test
+    public void update_Succeed_ReturnMember() {
+        //given
+        final MemberDto.MyAccountReq myAccountReq = buildMyAccountReq();
+        given(memberRepository.findOne(anyLong())).willReturn(memberEntity);
+
+        //when
+        Member member = memberService.update(anyLong(), myAccountReq);
+
+        //then
+        verify(memberRepository, atLeastOnce()).findOne(anyLong());
+        assertThat(member.getLastName(), is(myAccountReq.getLastName()));
+        assertThat(member.getFirstName(), is(myAccountReq.getFirstName()));
+        assertThat(member.getMobile(), is(myAccountReq.getMobile()));
+        assertThat(member.getDob(), is(nullValue()));
+    }
+
+    @Test
+    public void findAll() {
+        //given
+        final int endExclusive = 20;
+        final List<Member> members = eachCreateMember(endExclusive);
+        given(memberRepository.findAll(new PageRequest(0, endExclusive))).willReturn(new PageImpl<>(members));
+
+        //when
+        final PageImpl<MemberDto.Res> page = memberService.findAll(new PageRequest(0, endExclusive));
+        final List<MemberDto.Res> content = page.getContent();
+
+        //then
+        assertThat(content, hasSize(endExclusive));
+    }
+
+    private List<Member> eachCreateMember(final int endExclusive) {
+
+        final String EMAIL = "test@email.com";
+        final String PASSWORD = "qwer1234";
+
+        List<Member> members = new ArrayList<>();
+        for (int i = 0; i < endExclusive; i++) {
+            final MemberDto.SignUpReq member = memberMock.setSignUpDto(i + EMAIL, PASSWORD, PASSWORD);
+            given(memberRepository.save(any(Member.class))).willReturn(toEntity(member));
+            members.add(memberService.create(member));
+        }
+        return members;
+    }
+
+    private MemberDto.MyAccountReq buildMyAccountReq() {
+        return MemberDto.MyAccountReq.builder()
+                .lastName("테")
+                .firstName("스트")
+                .mobile("01071333262")
+                .build();
+    }
+
     private Member toEntity(MemberDto.SignUpReq dto) {
         return dto.toEntity(passwordEncoder.encode("password001"), MemberRoleEnum.USER);
     }
 
     private MemberDto.SignUpReq buildSignUp() {
-//        return MemberDto.SignUpReq.builder()
-//                .email("cheese10yun@gmail.com")
-//                .password("password001")
-//                .rePassword("password001")
-//                .build();
-
         return memberMock.setSignUpDto("cheese10yun@gmail.com", "password001", "password001");
+    }
+
+    private MemberDto.SignUpReq buildSignUp(String email) {
+        return memberMock.setSignUpDto(email, "password001", "password001");
     }
 
     private void assertThatProperty(MemberDto.SignUpReq dto, Member memberEntity, Member member) {
@@ -178,36 +228,4 @@ public class MemberServiceImplTest {
         return passwordEncoder.matches(rewPassword, encodePassword);
     }
 
-    //    private final String EMAIL = "cheese10yun@gmail.com";
-//    private final String PASSWORD = "password001";
-//    private final String RE_PASSWORD = "password001";
-//    @Autowired
-//    private MemberServiceImpl memberService;
-//    private MemberMock memberMock;
-//
-//    @Before
-//    public void setUp() {
-//        memberMock = new MemberMock();
-//    }
-//
-//    @Test
-//    public void When_emailIsExisted_expect_userReturn() {
-//        memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
-//        Member member = memberService.findByEmail(EMAIL);
-//        assertThat(member, is(notNullValue()));
-//        assertThat(member.getEmail(), is(EMAIL));
-//    }
-//
-//    @Test(expected = MemberNotFoundException.class)
-//    public void When_emailIsNotExisted_expect_UserNotFoundException() {
-//        memberService.findByEmail("notExistedEmail@test.com");
-//    }
-//
-//    @Test
-//    public void name() {
-//        final DiscountDto.Creation dto = DiscountDto.Creation.builder()
-//                .description(null)
-//                .amount(10)
-//                .build();
-//    }
 }
