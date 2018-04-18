@@ -1,7 +1,7 @@
 package com.cheese.demo.member;
 
 import com.cheese.demo.SpringServerApplication;
-import com.cheese.demo.commons.ErrorCodeEnum;
+import com.cheese.demo.commons.ErrorCode;
 import com.cheese.demo.mock.DeviceDummy;
 import com.cheese.demo.mock.MemberMock;
 import com.cheese.demo.security.JwtTokenUtil;
@@ -91,21 +91,21 @@ public class MemberControllerTest {
 
         requestSignUp(dto)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.EMAIL_DUPLICATION.getMessage())))
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.EMAIL_DUPLICATION.getCode())));
+                .andExpect(jsonPath("$.message", is(ErrorCode.EMAIL_DUPLICATION.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCode.EMAIL_DUPLICATION.getCode())));
     }
 
     @Test
     public void When_SignUpEmailIsInValid_Expect_ConstraintViolationException() throws Exception {
         MemberDto.SignUpReq email_type_validation = memberMock.setSignUpDto("not_email_validate", PASSWORD, RE_PASSWORD);
-        requestSinUpNotValidate(email_type_validation, ErrorCodeEnum.INVALID_DOMAIN);
+        requestSinUpNotValidate(email_type_validation, ErrorCode.INVALID_DOMAIN);
     }
 
     @Test
     public void When_SignUpPasswordIsOnlyString_Expect_MethodArgumentNotValidException() throws Exception {
         //password is must to include number
         MemberDto.SignUpReq password_length_validation = memberMock.setSignUpDto(EMAIL, "123456", "123456");
-        requestSinUpNotValidate(password_length_validation, ErrorCodeEnum.INVALID_INPUTS);
+        requestSinUpNotValidate(password_length_validation, ErrorCode.INVALID_INPUTS);
     }
 
     @Test
@@ -130,8 +130,8 @@ public class MemberControllerTest {
 
         requestMyAccount(dto, 0L, token)
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getMessage())));
+                .andExpect(jsonPath("$.code", is(ErrorCode.MEMBER_NOT_FOUND.getCode())))
+                .andExpect(jsonPath("$.message", is(ErrorCode.MEMBER_NOT_FOUND.getMessage())));
     }
 
     // TODO: 2018. 3. 2. 비정상 토큰시 401에러를 못돌려주고 있음 리팩토리할것
@@ -142,9 +142,9 @@ public class MemberControllerTest {
         MemberDto.MyAccountReq dto = CreateMyAccountReq();
 
         requestMyAccount(dto, member.getId(), "inValidToken")
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
-                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
+                .andExpect(jsonPath("$.message", is(ErrorCode.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCode.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCode.UNAUTHORIZED.getStatus())));
     }
 
     @Test
@@ -162,8 +162,8 @@ public class MemberControllerTest {
 
         RequestGetUser(0L, token)
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getCode())))
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.MEMBER_NOT_FOUND.getMessage())));
+                .andExpect(jsonPath("$.code", is(ErrorCode.MEMBER_NOT_FOUND.getCode())))
+                .andExpect(jsonPath("$.message", is(ErrorCode.MEMBER_NOT_FOUND.getMessage())));
     }
 
     @Test
@@ -238,9 +238,9 @@ public class MemberControllerTest {
     public void When_getUserWithUnauthorized_expect_401() throws Exception {
         RequestGetUser(0L, "inValidToken")
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
-                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
+                .andExpect(jsonPath("$.message", is(ErrorCode.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCode.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCode.UNAUTHORIZED.getStatus())));
     }
 
 
@@ -286,7 +286,7 @@ public class MemberControllerTest {
                 .andDo(print());
     }
 
-    private void requestSinUpNotValidate(MemberDto.SignUpReq dto, ErrorCodeEnum invalidInputs) throws Exception {
+    private void requestSinUpNotValidate(MemberDto.SignUpReq dto, ErrorCode invalidInputs) throws Exception {
         requestSignUp(dto)
                 .andDo(print())
                 .andExpect(status().isBadRequest())

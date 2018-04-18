@@ -52,6 +52,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new JwtAuthenticationTokenFilter();
     }
 
+    private final String[] AUTH_WHITELIST = {
+            // -- swagger ui
+            "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/v2/api-docs",
+            "/webjars/**"
+    };
+
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -70,6 +78,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/browser/**").permitAll()
 
                 .antMatchers("/auth/**").permitAll()
+                .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers(HttpMethod.POST, MEMBER_URL_PATH).permitAll()
                 .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/exists**").permitAll()
                 .antMatchers(HttpMethod.GET, MEMBER_URL_PATH + "/{id}").authenticated()

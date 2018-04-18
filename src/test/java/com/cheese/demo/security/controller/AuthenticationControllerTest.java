@@ -1,7 +1,7 @@
 package com.cheese.demo.security.controller;
 
 import com.cheese.demo.SpringServerApplication;
-import com.cheese.demo.commons.ErrorCodeEnum;
+import com.cheese.demo.commons.ErrorCode;
 import com.cheese.demo.member.Member;
 import com.cheese.demo.member.MemberServiceImpl;
 import com.cheese.demo.mock.DeviceDummy;
@@ -96,9 +96,9 @@ public class AuthenticationControllerTest {
     public void When_getRefreshTokenIfInValidTokenWithUserRole_Except_returnRefreshToken() throws Exception {
         requestRefresh("inValidToken")
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
-                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
+                .andExpect(jsonPath("$.message", is(ErrorCode.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCode.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCode.UNAUTHORIZED.getStatus())));
     }
 
     @Test
@@ -115,9 +115,9 @@ public class AuthenticationControllerTest {
     public void When_getRefreshTokenIfInValidTokenWithAdminRole_Except_returnRefreshToken() throws Exception {
         requestRefresh("inValidToken")
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message", is(ErrorCodeEnum.UNAUTHORIZED.getMessage())))
-                .andExpect(jsonPath("$.code", is(ErrorCodeEnum.UNAUTHORIZED.getCode())))
-                .andExpect(jsonPath("$.status", is(ErrorCodeEnum.UNAUTHORIZED.getStatus())));
+                .andExpect(jsonPath("$.message", is(ErrorCode.UNAUTHORIZED.getMessage())))
+                .andExpect(jsonPath("$.code", is(ErrorCode.UNAUTHORIZED.getCode())))
+                .andExpect(jsonPath("$.status", is(ErrorCode.UNAUTHORIZED.getStatus())));
     }
 
     private JwtAuthenticationDto.Request buildDto(String email, String password) {

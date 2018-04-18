@@ -1,6 +1,6 @@
 package com.cheese.demo.security;
 
-import com.cheese.demo.commons.ErrorCodeEnum;
+import com.cheese.demo.commons.ErrorCode;
 import com.cheese.demo.commons.ErrorResponse;
 import com.cheese.demo.security.exception.JwtTokenMalformedException;
 import com.cheese.demo.security.service.UserDetailsServiceImpl;
@@ -50,13 +50,13 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             setAuthentication(request, jwtAuthTokenDto);
             chain.doFilter(request, response);
         } catch (JwtTokenMalformedException e) {
-            doResponseError(response, getErrorResponse(getFieldErrors(e), ErrorCodeEnum.UNAUTHORIZED));
+            doResponseError(response, getErrorResponse(getFieldErrors(e), ErrorCode.UNAUTHORIZED));
         } catch (ExpiredJwtException e) {
-            doResponseError(response, getErrorResponse(getFieldErrors(e), ErrorCodeEnum.EXPIRATION_TOKEN));
+            doResponseError(response, getErrorResponse(getFieldErrors(e), ErrorCode.EXPIRATION_TOKEN));
         }
     }
 
-    private ErrorResponse getErrorResponse(List<ErrorResponse.FieldError> fieldErrors, ErrorCodeEnum expirationToken) {
+    private ErrorResponse getErrorResponse(List<ErrorResponse.FieldError> fieldErrors, ErrorCode expirationToken) {
         List<ErrorResponse.FieldError> error = fieldErrors;
         return buildErrorResponse(expirationToken, error);
     }
@@ -103,7 +103,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 
-    private ErrorResponse buildErrorResponse(ErrorCodeEnum errorCode, List<ErrorResponse.FieldError> errors) {
+    private ErrorResponse buildErrorResponse(ErrorCode errorCode, List<ErrorResponse.FieldError> errors) {
         return ErrorResponse.builder()
                 .status(errorCode.getStatus())
                 .code(errorCode.getCode())

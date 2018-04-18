@@ -1,5 +1,6 @@
 package com.cheese.demo.member;
 
+import com.cheese.demo.commons.model.Address;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,12 +18,14 @@ public class MemberDto {
         private String password;
         @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$")
         private String rePassword;
+        private Address address;
 
         @Builder
-        public SignUpReq(String email, String password, String rePassword) {
+        public SignUpReq(String email, String password, String rePassword, Address address) {
             this.email = email;
             this.password = password;
             this.rePassword = rePassword;
+            this.address = address;
         }
 
         public Member toEntity(String encodePassword, MemberRoleEnum role) {
@@ -30,6 +33,7 @@ public class MemberDto {
                     .email(email)
                     .password(encodePassword)
                     .role(role)
+                    .address(address)
                     .build();
         }
     }
@@ -60,6 +64,7 @@ public class MemberDto {
         private String firstName;
         private String mobile;
         private Date dob;
+        private Address address;
 
         public Res(Member entity) {
             this.id = entity.getId();
@@ -68,6 +73,7 @@ public class MemberDto {
             this.firstName = entity.getFirstName();
             this.mobile = entity.getMobile();
             this.dob = entity.getDob();
+            this.address = entity.getAddress();
         }
 
     }
