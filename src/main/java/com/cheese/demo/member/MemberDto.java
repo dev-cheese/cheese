@@ -54,18 +54,6 @@ public class MemberDto {
             this.dob = dob;
         }
 
-        public Member toEntity(Member entity) {
-            return Member.builder()
-                    .lastName(lastName)
-                    .firstName(firstName)
-                    .mobile(mobile)
-                    .dob(dob)
-                    .id(entity.getId())
-                    .password(entity.getPassword())
-                    .role(entity.getRole())
-                    .email(entity.getEmail())
-                    .build();
-        }
     }
 
     @Getter

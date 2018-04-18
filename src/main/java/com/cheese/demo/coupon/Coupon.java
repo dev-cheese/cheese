@@ -53,11 +53,12 @@ public class Coupon {
         return !isExpiration() && !isUsed();
     }
 
-    public void useCoupon() {
+    public void cancelUse() {
+        this.used = false;
+    }
+
+    public void doUse() {
         this.used = true;
     }
 
-    public void cancelCoupon() {
-        this.used = false;
-    }
 }
