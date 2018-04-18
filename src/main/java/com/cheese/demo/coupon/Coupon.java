@@ -28,12 +28,6 @@ public class Coupon {
     @Column(name = "used", nullable = false)
     private boolean used;
 
-    @Transient
-    private boolean expiration;
-
-    @Transient
-    private boolean useAvailable;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "discount_id", nullable = false, updatable = false)
     private Discount discount;
@@ -59,5 +53,11 @@ public class Coupon {
         return !isExpiration() && !isUsed();
     }
 
+    public void useCoupon() {
+        this.used = true;
+    }
 
+    public void cancelCoupon() {
+        this.used = false;
+    }
 }

@@ -3,8 +3,7 @@ package com.cheese.demo.commons;
 import lombok.Getter;
 
 @Getter
-public enum ErrorCodeEnum {
-
+public enum ErrorCode {
 
     EMAIL_DUPLICATION("U001", "중복된 이메일입니다.", 400),
     MEMBER_NOT_FOUND("U002", "해당 회원을 찾을 수 없습니다.", 404),
@@ -20,7 +19,7 @@ public enum ErrorCodeEnum {
     private final String message;
     private final int status;
 
-    ErrorCodeEnum(String code, String message, int status) {
+    ErrorCode(String code, String message, int status) {
         this.code = code;
         this.message = message;
         this.status = status;

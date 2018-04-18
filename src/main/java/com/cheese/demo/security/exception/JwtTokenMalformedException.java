@@ -1,6 +1,6 @@
 package com.cheese.demo.security.exception;
 
-import com.cheese.demo.commons.ErrorCodeEnum;
+import com.cheese.demo.commons.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtTokenMalformedException extends RuntimeException {
 
     public JwtTokenMalformedException(String message) {
-        super(String.valueOf(ErrorCodeEnum.UNAUTHORIZED.getMessage()));
+        super(String.valueOf(ErrorCode.UNAUTHORIZED.getMessage()));
         log.error(message);
     }
 }
