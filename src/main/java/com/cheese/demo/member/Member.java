@@ -1,6 +1,7 @@
 package com.cheese.demo.member;
 
 import com.cheese.demo.commons.EntityBaseDateTime;
+import com.cheese.demo.commons.model.Address;
 import com.cheese.demo.coupon.Coupon;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -45,6 +46,9 @@ public class Member extends EntityBaseDateTime {
     @Column(name = "dob", columnDefinition = "DATE")
     private Date dob;
 
+    @Embedded
+    private Address address;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, columnDefinition = "varchar(20) default 'USER'")
     private MemberRoleEnum role;
@@ -53,7 +57,7 @@ public class Member extends EntityBaseDateTime {
     private List<Coupon> coupons = new ArrayList<>();
 
     @Builder
-    public Member(long id, String email, String password, String lastName, String firstName, String mobile, Date dob, MemberRoleEnum role) {
+    public Member(long id, String email, String password, String lastName, String firstName, String mobile, Date dob, MemberRoleEnum role, Address address) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -62,6 +66,7 @@ public class Member extends EntityBaseDateTime {
         this.mobile = mobile;
         this.dob = dob;
         this.role = role;
+        this.address = address;
     }
 
     public void update(MemberDto.MyAccountReq dto) {
