@@ -37,7 +37,7 @@ public class Discount {
     private Timestamp updatedDt;
 
     @OneToMany(mappedBy = "discount")
-    private List<Coupon> coupons = new ArrayList<Coupon>();
+    private List<Coupon> coupons = new ArrayList<>();
 
     @Builder
     public Discount(String description, int amount, double rate, long expiration, DiscountIdEnum id) {
