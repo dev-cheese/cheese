@@ -4,7 +4,6 @@ import com.cheese.demo.commons.ErrorCode;
 import com.cheese.demo.commons.ErrorResponse;
 import com.cheese.demo.member.exception.EmailDuplicationException;
 import com.cheese.demo.member.exception.MemberNotFoundException;
-import com.cheese.demo.security.exception.JwtTokenMalformedException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
@@ -44,16 +43,6 @@ public class ExceptionAdviceController {
     protected ErrorResponse handleNotFoundException(RuntimeException ex) {
         ErrorCode code = getErrorCodeEnum(ex.getMessage());
         return createErrorResponse(HttpStatus.NOT_FOUND.value(), code.getCode(), code.getMessage(), null);
-    }
-
-    @ExceptionHandler(value = {
-            JwtTokenMalformedException.class
-    })
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody
-    protected ErrorResponse handleTest(JwtTokenMalformedException ex) {
-        ErrorCode code = getErrorCodeEnum(ex.getMessage());
-        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), code.getCode(), code.getMessage(), null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
