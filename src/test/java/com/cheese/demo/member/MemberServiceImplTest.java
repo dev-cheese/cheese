@@ -219,8 +219,8 @@ public class MemberServiceImplTest {
         assertThat(member.getDob(), is(memberEntity.getDob()));
         assertThat(member.getMobile(), is(memberEntity.getMobile()));
         assertThat(member.getRole(), is(memberEntity.getRole()));
-        assertThat(member.getCreatedDt(), is(memberEntity.getCreatedDt()));
-        assertThat(member.getUpdatedDt(), is(memberEntity.getUpdatedDt()));
+        assertThat(member.getCreatedAt(), is(memberEntity.getCreatedAt()));
+        assertThat(member.getUpdatedAt(), is(memberEntity.getUpdatedAt()));
         assertThat(isMatchedPassword(dto.getPassword(), member.getPassword()), is(true));
     }
 
