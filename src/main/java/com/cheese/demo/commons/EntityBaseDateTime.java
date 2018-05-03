@@ -14,8 +14,8 @@ import java.sql.Timestamp;
 public abstract class EntityBaseDateTime {
 
     @Column(name = "created_dt", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private Timestamp createdDt;
+    private Timestamp createdAt;
 
     @Column(name = "updated_dt", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-    private Timestamp updatedDt;
+    private Timestamp updatedAt;
 }
