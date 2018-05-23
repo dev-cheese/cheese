@@ -9,6 +9,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -16,8 +17,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
@@ -25,11 +29,11 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @RunWith(SpringRunner.class)
@@ -72,7 +76,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_SignUpValidMember_Expect_ReturnMember() throws Exception {
         MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         String token = generateToken();
@@ -82,7 +85,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_SignUpEmailIsDuplicated_Expect_EmailDuplicationException() throws Exception {
         MemberDto.SignUpReq dto = memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD);
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
@@ -95,14 +97,12 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_SignUpEmailIsInValid_Expect_ConstraintViolationException() throws Exception {
         MemberDto.SignUpReq email_type_validation = memberMock.setSignUpDto("not_email_validate", PASSWORD, RE_PASSWORD);
         requestSinUpNotValidate(email_type_validation, ErrorCode.INVALID_DOMAIN);
     }
 
     @Test
-    @Ignore
     public void When_SignUpPasswordIsOnlyString_Expect_MethodArgumentNotValidException() throws Exception {
         //password is must to include number
         MemberDto.SignUpReq password_length_validation = memberMock.setSignUpDto(EMAIL, "123456", "123456");
@@ -110,7 +110,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_MyAccountUpdateValid_Expect_returnMember() throws Exception {
         Member member = createUser();
         MemberDto.MyAccountReq dto = CreateMyAccountReq();
@@ -125,7 +124,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_MyAccountUpdateNotExistedMember_Expect_MemberNotFoundException() throws Exception {
         createUser();
         MemberDto.MyAccountReq dto = CreateMyAccountReq();
@@ -138,8 +136,8 @@ public class MemberControllerTest {
     }
 
     // TODO: 2018. 3. 2. 비정상 토큰시 401에러를 못돌려주고 있음 리팩토리할것
-    @Ignore
     @Test
+    @Ignore
     public void When_updateUserWithUnauthorized_Expect_JwtTokenMalformedException() throws Exception {
         Member member = createUser();
         MemberDto.MyAccountReq dto = CreateMyAccountReq();
@@ -152,7 +150,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_getMember_Expect_succeed() throws Exception {
         Member member = createUser();
         String token = generateToken();
@@ -161,7 +158,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_getMemberIfNotExisted_Expect_MemberNotFoundException() throws Exception {
         Member member = memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         String token = generateToken();
@@ -173,7 +169,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_getMembers_Expect_ReturnMembers() throws Exception {
         eachCreateUser(20);
         String token = generateToken();
@@ -190,7 +185,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_getUserPage2_expect_succeed() throws Exception {
         eachCreateUser(20);
         final int size = 10;
@@ -209,7 +203,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
         eachCreateUser(20);
         final int size = 51;
@@ -228,7 +221,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_emailIsNotExist_expect_false() throws Exception {
         String token = generateToken();
         requestExists(EMAIL,token )
@@ -237,7 +229,6 @@ public class MemberControllerTest {
     }
 
     @Test
-    @Ignore
     public void When_emailIsExist_expect_true() throws Exception {
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         String token = generateToken();
@@ -249,6 +240,7 @@ public class MemberControllerTest {
 
     // TODO: 2018. 4. 19. ACL 권한 임시 해제 -yun
     @Test
+    @Ignore
     public void When_getUserWithUnauthorized_expect_401() throws Exception {
         String token = generateToken();
         RequestGetUser(0L, token)
@@ -337,34 +329,33 @@ public class MemberControllerTest {
 
     private String obtainAccessToken() {
 
-//        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-//        params.add("grant_type", "password");
-//        params.add("client_id", "foo");
-//        params.add("username", "wan@gmail.com");
-//        params.add("password", "password001");
-//        params.add("scope", SCOPE);
-//
-//        ResultActions result
-//                = null;
-//        try {
-//            result = mockMvc.perform(post("/oauth/token")
-//                    .params(params)
-//                    .with(httpBasic(CLIENT_ID, CLIENT_SECRET))
-//                    .accept(CONTENT_TYPE))
-//                    .andExpect(content().contentType(CONTENT_TYPE));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        String resultString = null;
-//        try {
-//            resultString = result.andReturn().getResponse().getContentAsString();
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-//
-//        JacksonJsonParser jsonParser = new JacksonJsonParser();
-//        final String access_token = jsonParser.parseMap(resultString).get("access_token").toString();
-        return "7b30c887-8569-4df5-a22f-d8df1ecd741a";
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "password");
+        params.add("client_id", "foo");
+        params.add("username", "wan@gmail.com");
+        params.add("password", "password001");
+        params.add("scope", SCOPE);
+
+        ResultActions result
+                = null;
+        try {
+            result = mockMvc.perform(post("/oauth/token")
+                    .params(params)
+                    .with(httpBasic(CLIENT_ID, CLIENT_SECRET))
+                    .accept(CONTENT_TYPE))
+                    .andExpect(content().contentType(CONTENT_TYPE));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String resultString = null;
+        try {
+            resultString = result.andReturn().getResponse().getContentAsString();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        JacksonJsonParser jsonParser = new JacksonJsonParser();
+        return jsonParser.parseMap(resultString).get("access_token").toString();
     }
 }
