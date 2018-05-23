@@ -223,7 +223,7 @@ public class MemberControllerTest {
     @Test
     public void When_emailIsNotExist_expect_false() throws Exception {
         String token = generateToken();
-        requestExists(EMAIL,token )
+        requestExists(EMAIL, token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.existence", is(false)));
     }
@@ -314,7 +314,6 @@ public class MemberControllerTest {
     private Member createUser() {
         return memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
     }
-
 
 
     private MemberDto.MyAccountReq CreateMyAccountReq() {
