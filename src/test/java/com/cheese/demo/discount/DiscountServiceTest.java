@@ -2,7 +2,6 @@ package com.cheese.demo.discount;
 
 import com.cheese.demo.discount.exception.DiscountNotFoundException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,7 +16,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class DiscountServiceTest {
 
     @Mock

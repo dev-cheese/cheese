@@ -4,7 +4,6 @@ import com.cheese.demo.member.exception.EmailDuplicationException;
 import com.cheese.demo.member.exception.MemberNotFoundException;
 import com.cheese.demo.mock.MemberMock;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -27,7 +26,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class MemberServiceImplTest {
 
 
