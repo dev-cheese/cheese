@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS `ClientDetails`;
+
 CREATE TABLE `ClientDetails` (
   `appId` varchar(256) NOT NULL,
   `resourceIds` varchar(256) DEFAULT NULL,
@@ -43,6 +45,7 @@ VALUES
 UNLOCK TABLES;
 
 
+DROP TABLE IF EXISTS `oauth_approvals`;
 CREATE TABLE `oauth_approvals` (
   `userId` varchar(256) DEFAULT NULL,
   `clientId` varchar(256) DEFAULT NULL,
@@ -52,6 +55,7 @@ CREATE TABLE `oauth_approvals` (
   `lastModifiedAt` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `oauth_client_details`;
 CREATE TABLE `oauth_client_details` (
   `client_id` varchar(256) NOT NULL,
   `resource_ids` varchar(256) DEFAULT NULL,
@@ -67,6 +71,7 @@ CREATE TABLE `oauth_client_details` (
   PRIMARY KEY (`client_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `oauth_client_token`;
 CREATE TABLE `oauth_client_token` (
   `token_id` varchar(256) DEFAULT NULL,
   `token` blob,
@@ -76,11 +81,13 @@ CREATE TABLE `oauth_client_token` (
   PRIMARY KEY (`authentication_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `oauth_code`;
 CREATE TABLE `oauth_code` (
   `code` varchar(256) DEFAULT NULL,
   `authentication` blob
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `oauth_refresh_token`;
 CREATE TABLE `oauth_refresh_token` (
   `token_id` varchar(256) DEFAULT NULL,
   `token` blob,
