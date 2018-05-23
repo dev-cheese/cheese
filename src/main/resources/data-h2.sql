@@ -32,18 +32,6 @@ CREATE TABLE `oauth_client_details` (
   PRIMARY KEY (`client_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `oauth_client_details` WRITE;
-/*!40000 ALTER TABLE `oauth_client_details` DISABLE KEYS */;
-
-INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)
-VALUES
-	('clientIdPassword','','secret','read','password,authorization_code,refresh_token','','',NULL,NULL,'{}',''),
-	('foo','','bar','read','password,authorization_code,refresh_token','','',NULL,NULL,'{}',''),
-	('sampleClientId','',NULL,'read','implicit','','',NULL,NULL,'{}','read');
-
-/*!40000 ALTER TABLE `oauth_client_details` ENABLE KEYS */;
-UNLOCK TABLES;
-
 
 DROP TABLE IF EXISTS `oauth_approvals`;
 CREATE TABLE `oauth_approvals` (
@@ -95,6 +83,10 @@ CREATE TABLE `oauth_refresh_token` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-
+INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)
+VALUES
+	('clientIdPassword','','secret','read','password,authorization_code,refresh_token','','',NULL,NULL,'{}',''),
+	('foo','','bar','read','password,authorization_code,refresh_token','','',NULL,NULL,'{}',''),
+	('sampleClientId','',NULL,'read','implicit','','',NULL,NULL,'{}','read');
 insert into member (email, password, role) values ('admin001@gmail.com', '$2a$10$8E7ZvRZWqnHr6SrqG6sk6egqvO.EW88pkUKjKsmlz8pnAYAZn4LBi', 'ADMIN');
 insert into member (email, password, role) values ('wan@gmail.com', '$2a$10$8E7ZvRZWqnHr6SrqG6sk6egqvO.EW88pkUKjKsmlz8pnAYAZn4LBi', 'USER');
