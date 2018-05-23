@@ -3,7 +3,6 @@ jdk:
   - openjdk8
 
 before_install:
-  - mysql -e 'DROP DATABASE cheese;'
   - mysql -e 'CREATE DATABASE IF NOT EXISTS cheese;'
 
 install: true
