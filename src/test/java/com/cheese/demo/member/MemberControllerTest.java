@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -34,9 +33,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @RunWith(SpringRunner.class)
@@ -46,9 +43,10 @@ public class MemberControllerTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private MemberServiceImpl memberService;
 
     private String CLIENT_ID = "foo";
     private String CLIENT_SECRET = "bar";
@@ -64,12 +62,7 @@ public class MemberControllerTest {
     private final String MOBILE = "01071333262";
     private final Date DOB = Date.valueOf(LocalDate.now());
     private final String ADMIN_EMAIL = "admin001@gmail.com";
-    @Autowired
-    private FilterChainProxy springSecurityFilterChain;
-    @Autowired
-    private MemberServiceImpl memberService;
-    @Autowired
-    private MemberRepository memberRepository;
+
 
     private MockMvc mockMvc;
     private MemberMock memberMock;
