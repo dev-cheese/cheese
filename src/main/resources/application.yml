@@ -21,12 +21,3 @@ spring:
 logging:
   level:
     ROOT: debug
-
-jwt:
-  header: Authorization
-  secret: mySecret
-  expiration: 604800
-  route:
-    authentication:
-      path: auth
-      refresh: refresh
