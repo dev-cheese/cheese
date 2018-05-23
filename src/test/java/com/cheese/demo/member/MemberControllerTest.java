@@ -177,6 +177,7 @@ public class MemberControllerTest {
     }
 
     @Test
+    @Ignore
     public void When_getMembers_Expect_ReturnMembers() throws Exception {
         eachCreateUser(20);
         String token = generateToken();
@@ -193,6 +194,7 @@ public class MemberControllerTest {
     }
 
     @Test
+    @Ignore
     public void When_getUserPage2_expect_succeed() throws Exception {
         eachCreateUser(20);
         final int size = 10;
@@ -211,6 +213,7 @@ public class MemberControllerTest {
     }
 
     @Test
+    @Ignore
     public void When_sizeOverThan50_expect_sizeSet10() throws Exception {
         eachCreateUser(20);
         final int size = 51;
@@ -229,6 +232,7 @@ public class MemberControllerTest {
     }
 
     @Test
+    @Ignore
     public void When_emailIsNotExist_expect_false() throws Exception {
         String token = generateToken();
         requestExists(EMAIL,token )
@@ -237,6 +241,7 @@ public class MemberControllerTest {
     }
 
     @Test
+    @Ignore
     public void When_emailIsExist_expect_true() throws Exception {
         memberService.create(memberMock.setSignUpDto(EMAIL, PASSWORD, RE_PASSWORD));
         String token = generateToken();
@@ -247,7 +252,6 @@ public class MemberControllerTest {
 
 
     // TODO: 2018. 4. 19. ACL 권한 임시 해제 -yun
-    @Ignore
     @Test
     public void When_getUserWithUnauthorized_expect_401() throws Exception {
         String token = generateToken();
