@@ -74,6 +74,7 @@ public class Member extends EntityBaseDateTime {
         this.firstName = dto.getFirstName();
         this.mobile = dto.getMobile();
         this.dob = dto.getDob();
+
     }
 
 }
