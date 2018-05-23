@@ -39,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SpringServerApplication.class)
 @Transactional
+@Ignore
 public class MemberControllerTest {
 
     @Autowired
