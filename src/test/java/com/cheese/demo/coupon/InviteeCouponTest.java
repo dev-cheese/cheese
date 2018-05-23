@@ -8,6 +8,7 @@ import com.cheese.demo.member.MemberDto;
 import com.cheese.demo.member.MemberRoleEnum;
 import com.cheese.demo.member.MemberServiceImpl;
 import com.cheese.demo.mock.MemberMock;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,6 +22,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyLong;
 
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class InviteeCouponTest {
 
     private final String email = "cheese10yun@gmail.com";
